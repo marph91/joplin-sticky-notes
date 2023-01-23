@@ -38,16 +38,25 @@ class NoteManager:
 
         self.settings_file = Path().home() / ".joplin-sticky-notes/notes.json"
         if self.settings_file.exists():
-            with open(self.settings_file) as infile:
-                note_properties = json.load(infile)
-            for note in note_properties:
-                self.new_note(
-                    note["position"], note["size"], note.get("visible", False)
-                )
+            try:
+                with open(self.settings_file) as infile:
+                    saved_notes = json.load(infile)
+            except json.decoder.JSONDecodeError:
+                return  # no notes to import
+            for note in saved_notes:
+                self.new_note(**note)
         else:
             self.settings_file.parent.mkdir(exist_ok=True)
 
-    def new_note(self, position=(40, 40), size=(400, 200), visible=False):
+    def new_note(
+        self,
+        position=(40, 40),
+        size=(400, 200),
+        visible=True,
+        title="New Note",
+        content="",
+        id=None,
+    ):
 
         # Create a new builder for each note.
         builder = Gtk.Builder()
@@ -77,7 +86,17 @@ class NoteManager:
             note_window.resize(size[0], 1)
         body.set_visible(visible)
 
-        self.notes.append({"window": note_window})
+        note_window.set_title(title)
+        body.get_buffer().set_text(content)
+
+        self.notes.append(
+            {
+                "window": note_window,
+                "title": title,
+                "content": content,
+                "id": id,
+            }
+        )
 
         builder.connect_signals(NoteHandler(note_window))
 
@@ -86,16 +105,20 @@ class NoteManager:
 
     def save_notes(self):
         print("save", len(self.notes))
-        notes = []
+        notes_to_save = []
         for note in self.notes:
             note_window = note["window"]
-            note_properties = {}
-            note_properties["position"] = get_position_(note_window)
-            note_properties["size"] = get_size_(note_window)
-            note_properties["visible"] = note_window.get_child().props.visible
-            notes.append(note_properties)
+            notes_to_save.append(
+                {
+                    "position": get_position_(note_window),
+                    "size": get_size_(note_window),
+                    "visible": note_window.get_child().props.visible,
+                    # Store all other data except of the window.
+                    **{key: note[key] for key in note if key != "window"},
+                }
+            )
         with open(self.settings_file, "w") as outfile:
-            json.dump(notes, outfile, indent=2)
+            json.dump(notes_to_save, outfile, indent=2)
 
         return True  # To keep the loop running.
 
@@ -131,11 +154,15 @@ class NoteHandler:
             return  # should be a single selected value anyway
 
     def on_clone_clicked(self, button):
+        note = [note for note in nm.notes if note["window"] == self.note_window][0]
         body = self.note_window.get_child()
         nm.new_note(
             get_position_(self.note_window, offset=(20, 20)),
             get_size_(self.note_window),
             body.props.visible,
+            note["title"],
+            note["content"],
+            note["id"],
         )
 
     def on_delete_clicked(self, button):
@@ -154,12 +181,20 @@ class NoteHandler:
 
     def on_select_note_clicked(self, button):
         if self.selected_note is not None and self.selected_note[1] is not None:
+
+            # update the ui
             self.note_window.set_title(self.selected_note[0])
             # TODO: add other infos
             body = self.note_window.get_child()
-            note = joplin_api.get_note(self.selected_note[1], fields="body")
-            body.get_buffer().set_text(note.body)
+            joplin_note = joplin_api.get_note(self.selected_note[1], fields="body")
+            body.get_buffer().set_text(joplin_note.body)
             button.get_window().destroy()
+
+            # update the note manager
+            note = [note for note in nm.notes if note["window"] == self.note_window][0]
+            note["title"] = self.selected_note[0]
+            note["content"] = joplin_note.body
+            note["id"] = self.selected_note[1]
         else:
             print("Invalid selection")
 
@@ -242,7 +277,7 @@ def main():
     indicator.set_status(appindicator.IndicatorStatus.ACTIVE)
     indicator.get_menu().show_all()
 
-    # Save the notes every minute.
+    # Save the notes every 5 seconds.
     GLib.timeout_add_seconds(5, nm.save_notes)
 
     # Try to connect to joplin every 5 seconds.
