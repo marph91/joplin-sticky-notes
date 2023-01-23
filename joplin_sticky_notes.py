@@ -34,13 +34,13 @@ class NoteManager:
     """Load and save notes."""
 
     def __init__(self):
-        self.note_windows = []
+        self.notes = []
 
         self.settings_file = Path().home() / ".joplin-sticky-notes/notes.json"
         if self.settings_file.exists():
             with open(self.settings_file) as infile:
-                notes = json.load(infile)
-            for note in notes:
+                note_properties = json.load(infile)
+            for note in note_properties:
                 self.new_note(
                     note["position"], note["size"], note.get("visible", False)
                 )
@@ -77,23 +77,23 @@ class NoteManager:
             note_window.resize(size[0], 1)
         body.set_visible(visible)
 
-        self.note_windows.append(note_window)
+        self.notes.append({"window": note_window})
 
         builder.connect_signals(NoteHandler(note_window))
 
-    def delete_note(self, note):
-        self.note_windows.remove(note)
+    def delete_note(self, note_window):
+        self.notes = [note for note in self.notes if note["window"] != note_window]
 
     def save_notes(self):
-        print("save")
-        print(len(self.note_windows))
+        print("save", len(self.notes))
         notes = []
-        for note_window in self.note_windows:
-            note = {}
-            note["position"] = get_position_(note_window)
-            note["size"] = get_size_(note_window)
-            note["visible"] = note_window.get_child().props.visible
-            notes.append(note)
+        for note in self.notes:
+            note_window = note["window"]
+            note_properties = {}
+            note_properties["position"] = get_position_(note_window)
+            note_properties["size"] = get_size_(note_window)
+            note_properties["visible"] = note_window.get_child().props.visible
+            notes.append(note_properties)
         with open(self.settings_file, "w") as outfile:
             json.dump(notes, outfile, indent=2)
 
@@ -219,7 +219,7 @@ class TrayHandler:
     # def on_show_all_notes_activate(self, *args):
     #     # Bringing windows to foreground/background doesn't seem to work:
     #     # https://gitlab.gnome.org/GNOME/gtk/-/issues/1638
-    #     for window in nm.note_windows:
+    #     for window in nm.notes:
     #         window.present()
 
     def on_quit_activate(self, *args):
