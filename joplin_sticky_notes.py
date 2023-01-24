@@ -68,10 +68,6 @@ class NoteManager:
         configure_menu_button = builder.get_object("configure_menu_button")
         configure_menu_button.set_popup(configure_menu)
 
-        note_info_menu = builder.get_object("note_info_menu")
-        note_info_menu_button = builder.get_object("note_info_menu_button")
-        note_info_menu_button.set_popup(note_info_menu)
-
         # final note layout
         note_window = builder.get_object("note_body")
         title_bar = builder.get_object("note_title")
