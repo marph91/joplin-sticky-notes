@@ -15,7 +15,7 @@ gi.require_version("AppIndicator3", "0.1")
 gi.require_version("WebKit2", "4.1")
 from gi.repository import GLib, Gtk
 from gi.repository import AppIndicator3 as appindicator
-from gi.repository.WebKit2 import WebView
+import gi.repository.WebKit2 as WebKit2
 from markdown import Markdown
 
 from joplin_api_helper import setup_joplin, create_hierarchy
@@ -37,8 +37,16 @@ class NoteManager:
     """Load and save notes."""
 
     def __init__(self):
+        # Needed to prevent:
+        # gi.repository.GLib.GError: gtk-builder-error-quark: note.glade:255:1 Invalid type function 'webkit_settings_get_type' (0)
+        WebKit2.WebView
+
         self.notes = []
         self.md = Markdown(extensions=["nl2br", "sane_lists", "tables"])
+
+        with open("style.css") as infile:
+            style_sheet_content = "\n".join(infile.readlines())
+        self.webview_style_sheet = WebKit2.UserStyleSheet(style_sheet_content, WebKit2.UserContentInjectedFrames.ALL_FRAMES, WebKit2.UserStyleLevel.USER)
 
         self.settings_file = Path().home() / ".joplin-sticky-notes/notes.json"
         if self.settings_file.exists():
@@ -79,8 +87,11 @@ class NoteManager:
         note_window.move(*position)
         note_window.show_all()
 
-        # https://webkitgtk.org/reference/webkit2gtk/stable/method.WebView.load_html.html
         body = note_window.get_child()
+        # Inject a custom style sheet to apply light/dark theme in the webview.
+        content_manager = body.get_user_content_manager()
+        content_manager.add_style_sheet(self.webview_style_sheet)
+        # https://webkitgtk.org/reference/webkit2gtk/stable/method.WebView.load_html.html
         body.load_html(self.md.convert(content), "")
 
         if visible:

@@ -74,19 +74,6 @@
       </object>
     </child>
   </object>
-  <object class="GtkWindow" id="note_body">
-    <property name="can-focus">False</property>
-    <property name="skip-taskbar-hint">True</property>
-    <child>
-      <object class="WebKitWebView" type-func="webkit_web_view_get_type" id="note_body_webview">
-        <property name="visible">True</property>
-        <property name="can-focus">True</property>
-        <child>
-          <placeholder/>
-        </child>
-      </object>
-    </child>
-  </object>
   <object class="GtkTreeStore" id="note_selection_store">
     <columns>
       <!-- column-name note -->
@@ -174,7 +161,6 @@
     </child>
   </object>
   <object class="GtkHeaderBar" id="note_title">
-    <property name="visible">True</property>
     <property name="can-focus">False</property>
     <property name="title" translatable="yes">Note</property>
     <property name="has-subtitle">False</property>
@@ -262,6 +248,35 @@
       <packing>
         <property name="position">5</property>
       </packing>
+    </child>
+  </object>
+  <object class="WebKitSettings" type-func="webkit_settings_get_type" id="webview_settings">
+    <property name="enable-javascript">False</property>
+    <property name="enable-xss-auditor">False</property>
+    <property name="enable-hyperlink-auditing">False</property>
+    <property name="enable-tabs-to-links">False</property>
+    <property name="enable-fullscreen">False</property>
+    <property name="print-backgrounds">False</property>
+    <property name="enable-webaudio">False</property>
+    <property name="enable-webgl">False</property>
+    <property name="media-playback-allows-inline">False</property>
+    <property name="enable-site-specific-quirks">False</property>
+    <property name="user-agent">Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Safari/605.1.15</property>
+    <property name="enable-javascript-markup">False</property>
+    <property name="enable-media">False</property>
+  </object>
+  <object class="GtkWindow" id="note_body">
+    <property name="can-focus">False</property>
+    <property name="skip-taskbar-hint">True</property>
+    <child>
+      <object class="WebKitWebView" type-func="webkit_web_view_get_type" id="note_body_webview">
+        <property name="visible">True</property>
+        <property name="can-focus">True</property>
+        <property name="settings">webview_settings</property>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
     </child>
   </object>
 </interface>
