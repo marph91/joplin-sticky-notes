@@ -10,9 +10,13 @@ from cx_Freeze import setup, Executable
 # Dependencies are automatically detected, but it might need fine tuning.
 build_exe_options = {
     "packages": [
+        "joppy",
         "gi",
+        # markdown related
+        "markdown",
+        "html",
     ],
-    "include_files": ["note.glade", "tray.glade"],
+    "include_files": ["note.glade", "tray.glade", "style.css"],
 }
 
 # base="Win32GUI" should be used only for Windows GUI app
