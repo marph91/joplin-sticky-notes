@@ -1,5 +1,5 @@
 # sudo apt install libgtk-3-0 libgtk-3-dev
-# sudo apt install gir1.2-appindicator3-0.1
+# sudo apt install gir1.2-appindicator3-0.1 gir1.2-webkit2-4.1
 # https://github.com/linuxmint/sticky/blob/8b8bf3025370be11a45b553db20e7cf193807a4a/usr/lib/sticky/sticky.py#L910
 # https://github.com/nieseman/traymenu/blob/main/traymenu/gtk.py
 
@@ -12,8 +12,11 @@ import gi
 
 gi.require_version("Gtk", "3.0")
 gi.require_version("AppIndicator3", "0.1")
+gi.require_version("WebKit2", "4.1")
 from gi.repository import GLib, Gtk
 from gi.repository import AppIndicator3 as appindicator
+from gi.repository.WebKit2 import WebView
+from markdown import Markdown
 
 from joplin_api_helper import setup_joplin, create_hierarchy
 
@@ -35,6 +38,7 @@ class NoteManager:
 
     def __init__(self):
         self.notes = []
+        self.md = Markdown(extensions=["nl2br", "sane_lists", "tables"])
 
         self.settings_file = Path().home() / ".joplin-sticky-notes/notes.json"
         if self.settings_file.exists():
@@ -75,7 +79,10 @@ class NoteManager:
         note_window.move(*position)
         note_window.show_all()
 
+        # https://webkitgtk.org/reference/webkit2gtk/stable/method.WebView.load_html.html
         body = note_window.get_child()
+        body.load_html(self.md.convert(content), "")
+
         if visible:
             note_window.resize(*size)
         else:
@@ -83,7 +90,6 @@ class NoteManager:
         body.set_visible(visible)
 
         note_window.set_title(title)
-        body.get_buffer().set_text(content)
 
         self.notes.append(
             {
@@ -183,7 +189,7 @@ class NoteHandler:
             # TODO: add other infos
             body = self.note_window.get_child()
             joplin_note = joplin_api.get_note(self.selected_note[1], fields="body")
-            body.get_buffer().set_text(joplin_note.body)
+            body.load_html(nm.md.convert(joplin_note.body), "")
             button.get_window().destroy()
 
             # update the note manager
