@@ -16,7 +16,7 @@ build_exe_options = {
         "markdown",
         "html",
     ],
-    "include_files": ["note.glade", "tray.glade", "style.css"],
+    "include_files": ["ui"],
 }
 
 # base="Win32GUI" should be used only for Windows GUI app
@@ -27,5 +27,7 @@ setup(
     version="0.1",
     description="Joplin Sticky Notes",
     options={"build_exe": build_exe_options},
-    executables=[Executable("joplin_sticky_notes.py", base=base)],
+    executables=[
+        Executable("joplin_sticky_notes.py", base=base, icon="img/logo_96_blue.png")
+    ],
 )

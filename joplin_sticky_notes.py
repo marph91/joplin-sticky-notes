@@ -44,9 +44,13 @@ class NoteManager:
         self.notes = []
         self.md = Markdown(extensions=["nl2br", "sane_lists", "tables"])
 
-        with open("style.css") as infile:
+        with open("ui/style.css") as infile:
             style_sheet_content = "\n".join(infile.readlines())
-        self.webview_style_sheet = WebKit2.UserStyleSheet(style_sheet_content, WebKit2.UserContentInjectedFrames.ALL_FRAMES, WebKit2.UserStyleLevel.USER)
+        self.webview_style_sheet = WebKit2.UserStyleSheet(
+            style_sheet_content,
+            WebKit2.UserContentInjectedFrames.ALL_FRAMES,
+            WebKit2.UserStyleLevel.USER,
+        )
 
         self.settings_file = Path().home() / ".joplin-sticky-notes/notes.json"
         if self.settings_file.exists():
@@ -72,7 +76,7 @@ class NoteManager:
 
         # Create a new builder for each note.
         builder = Gtk.Builder()
-        builder.add_from_file("note.glade")
+        builder.add_from_file("ui/note.glade")
 
         # Link the popover menu manually, since populating it doesn't work in glade.
         # https://gitlab.gnome.org/GNOME/glade/-/issues/509
@@ -215,7 +219,7 @@ class NoteHandler:
         # https://stackoverflow.com/a/74833667/7410886
         # https://www.tutorialspoint.com/pygtk/pygtk_treeview_class.htm
         builder = Gtk.Builder()
-        builder.add_from_file("note.glade")
+        builder.add_from_file("ui/note.glade")
         builder.connect_signals(self)
 
         # Fill tree with data.
@@ -276,14 +280,14 @@ class TrayHandler:
 
 def main():
     builder = Gtk.Builder()
-    builder.add_from_file("tray.glade")
+    builder.add_from_file("ui/tray.glade")
     tray_handler = TrayHandler(builder.get_object("joplin_status"))
     builder.connect_signals(tray_handler)
 
     tray_menu = builder.get_object("tray_menu")
     indicator = appindicator.Indicator.new(
         "joplin-sticky-notes",
-        str(Path(__file__).parent / "logo_96_blue.png"),
+        str(Path(__file__).parent / "../img/logo_96_blue.png"),
         appindicator.IndicatorCategory.SYSTEM_SERVICES,
     )
     indicator.set_menu(tray_menu)
