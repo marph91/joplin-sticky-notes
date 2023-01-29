@@ -287,7 +287,7 @@ def main():
     tray_menu = builder.get_object("tray_menu")
     indicator = appindicator.Indicator.new(
         "joplin-sticky-notes",
-        str(Path(__file__).parent / "../img/logo_96_blue.png"),
+        str(Path(__file__).parent.parent / "img/logo_96_blue.png"),
         appindicator.IndicatorCategory.SYSTEM_SERVICES,
     )
     indicator.set_menu(tray_menu)
