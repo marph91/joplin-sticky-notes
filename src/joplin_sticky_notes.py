@@ -309,7 +309,7 @@ def main():
     GLib.timeout_add_seconds(5, tray_handler.check_joplin_status)
 
     if args.test:
-        GLib.timeout_add_seconds(10, Gtk.main_quit)
+        GLib.timeout_add_seconds(6, Gtk.main_quit)
 
     Gtk.main()
 

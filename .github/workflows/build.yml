@@ -28,6 +28,8 @@ jobs:
         run: ./bootstrap.sh ${{matrix.target}}
       - name: Build executable with pyinstaller
         run: ./build.sh ${{matrix.target}}
+      - name: Check python script
+        run: python3 src/joplin_sticky_notes.py --test
       #- uses: actions/upload-artifact@v3
       #  with:
       #    name: my-artifact
