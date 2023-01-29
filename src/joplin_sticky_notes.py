@@ -1,5 +1,3 @@
-# sudo apt install libgtk-3-0 libgtk-3-dev
-# sudo apt install gir1.2-appindicator3-0.1 gir1.2-webkit2-4.1
 # https://github.com/linuxmint/sticky/blob/8b8bf3025370be11a45b553db20e7cf193807a4a/usr/lib/sticky/sticky.py#L910
 # https://github.com/nieseman/traymenu/blob/main/traymenu/gtk.py
 
@@ -12,10 +10,8 @@ import time
 import gi
 
 gi.require_version("Gtk", "3.0")
-gi.require_version("AppIndicator3", "0.1")
 gi.require_version("WebKit2", "4.1")
 from gi.repository import GLib, Gtk
-from gi.repository import AppIndicator3 as appindicator
 import gi.repository.WebKit2 as WebKit2
 from markdown import Markdown
 
@@ -64,6 +60,23 @@ class NoteManager:
                 self.new_note(**note)
         else:
             self.settings_file.parent.mkdir(exist_ok=True)
+        
+        if self.notes == []:
+            # We need at least one note as starting point.
+            self.new_note()
+
+    def check_joplin_status(self):
+        # TODO: Communicate via notification?
+
+        try:
+            joplin_api.ping()
+            connected = True
+            print("Joplin Status: Connected")
+        except requests.exceptions.ConnectionError:
+            connected = False
+            print("Connect Joplin")
+
+        return not connected  # Invert to keep the loop running if not connected.
 
     def new_note(
         self,
@@ -184,8 +197,15 @@ class NoteHandler:
         )
 
     def on_delete_clicked(self, button):
+        if len(nm.notes) == 1:
+            print("Quit")
+            Gtk.main_quit()
+            return
         nm.delete_note(self.note_window)
         self.note_window.destroy()
+
+    def on_quit_activate(self, *args):
+        Gtk.main_quit()
 
     # Note selection window
 
@@ -241,68 +261,14 @@ class NoteHandler:
         window.show_all()
 
 
-class TrayHandler:
-    """
-    Handles all tray interactions.
-    The tray is the starting point to add the first note.
-    """
-
-    def __init__(self, joplin_status):
-        self.joplin_status = joplin_status
-
-    def check_joplin_status(self):
-        try:
-            joplin_api.ping()
-            connected = True
-            self.joplin_status.set_label("Joplin Status: Connected")
-        except requests.exceptions.ConnectionError:
-            connected = False
-            self.joplin_status.set_label("Connect Joplin")
-        self.joplin_status.set_sensitive(not connected)
-
-        return not connected  # Invert to keep the loop running if not connected.
-
-    def on_connect_joplin_activate(self, *args):
-        setup_joplin()
-        self.check_joplin_status()
-
-    def on_new_note_activate(self, *args):
-        nm.new_note()
-
-    # def on_show_all_notes_activate(self, *args):
-    #     # Bringing windows to foreground/background doesn't seem to work:
-    #     # https://gitlab.gnome.org/GNOME/gtk/-/issues/1638
-    #     for window in nm.notes:
-    #         window.present()
-
-    def on_quit_activate(self, *args):
-        Gtk.main_quit()
-
-
 def main():
-
-    # Build the tray menu.
-    builder = Gtk.Builder()
-    builder.add_from_file("ui/tray.glade")
-    tray_handler = TrayHandler(builder.get_object("joplin_status"))
-    builder.connect_signals(tray_handler)
-
-    tray_menu = builder.get_object("tray_menu")
-    indicator = appindicator.Indicator.new(
-        "joplin-sticky-notes",
-        str(Path(__file__).parent.parent / "img/logo_96_blue.png"),
-        appindicator.IndicatorCategory.SYSTEM_SERVICES,
-    )
-    indicator.set_menu(tray_menu)
-    indicator.set_status(appindicator.IndicatorStatus.ACTIVE)
-    indicator.get_menu().show_all()
 
     # Save the notes every 5 seconds.
     GLib.timeout_add_seconds(5, nm.save_notes)
 
     # Try to connect to joplin every 5 seconds.
     # Stops if the connection was successful.
-    GLib.timeout_add_seconds(5, tray_handler.check_joplin_status)
+    GLib.timeout_add_seconds(5, nm.check_joplin_status)
 
     if is_test:
         GLib.timeout_add_seconds(1, Gtk.main_quit)
