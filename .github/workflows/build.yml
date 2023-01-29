@@ -31,11 +31,11 @@ jobs:
         run: ./bootstrap.sh ${{matrix.target}}
       - name: Build executable with pyinstaller
         run: ./build.sh ${{matrix.target}}
-      - name: Check python script
-        run: python3 src/joplin_sticky_notes.py
       - uses: actions/upload-artifact@v3
         with:
           name: joplin-sticky-notes
           path: ./dist/joplin-sticky-notes
       - name: Run the executable
-        run: ./dist/joplin-sticky-notes
+        uses: coactions/setup-xvfb@v1
+        with:
+          run: ./dist/joplin-sticky-notes
