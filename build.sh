@@ -11,7 +11,7 @@ fi
 
 # clear and build
 rm -rf dist
-python -OO -m PyInstaller "pyinstaller_files/build_$1.spec" --noconfirm
+python -OO -m PyInstaller "pyinstaller_files/build_linux.spec" --noconfirm
 
 # exit venv
 deactivate
