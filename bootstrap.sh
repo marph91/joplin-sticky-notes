@@ -2,7 +2,7 @@
 
 # https://pygobject.readthedocs.io/en/latest/getting_started.html
 if [ "$1" = "linux" ]; then
-    sudo apt install gir1.2-gtk-3.0 libgirepository1.0-dev
+    sudo apt install libgirepository1.0-dev gir1.2-gtk-3.0 gir1.2-appindicator3-0.1 gir1.2-webkit2-4.1
 elif [ "$1" = "macos" ]; then
     brew install pygobject3 gtk+3
 elif [ "$1" = "windows" ]; then
