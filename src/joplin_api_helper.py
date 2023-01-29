@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import sys
+import time
 
 from joppy.api import Api
 import requests
@@ -14,8 +16,10 @@ def request_api_token():
         response = requests.post("http://localhost:41184/auth")
         if response.status_code == 200:
             auth_token = response.json()["auth_token"]
+        else:
+            return None
     except requests.exceptions.ConnectionError:
-        pass
+        return None
 
     for _ in range(30):
         response = requests.get(
@@ -39,6 +43,8 @@ def setup_joplin():
     else:
         settings_file.parent.mkdir(exist_ok=True)
         api_token = request_api_token()
+    if api_token is None:
+        sys.exit(1)
 
     with open(settings_file, "w") as outfile:
         json.dump({"api_token": api_token}, outfile, indent=2)
