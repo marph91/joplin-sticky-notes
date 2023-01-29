@@ -3,6 +3,7 @@
 # https://github.com/linuxmint/sticky/blob/8b8bf3025370be11a45b553db20e7cf193807a4a/usr/lib/sticky/sticky.py#L910
 # https://github.com/nieseman/traymenu/blob/main/traymenu/gtk.py
 
+import argparse
 from dataclasses import dataclass
 import json
 from pathlib import Path
@@ -279,6 +280,12 @@ class TrayHandler:
 
 
 def main():
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--test", action="store_true")
+    args = parser.parse_args()
+
+    # Build the tray menu.
     builder = Gtk.Builder()
     builder.add_from_file("ui/tray.glade")
     tray_handler = TrayHandler(builder.get_object("joplin_status"))
@@ -300,6 +307,9 @@ def main():
     # Try to connect to joplin every 5 seconds.
     # Stops if the connection was successful.
     GLib.timeout_add_seconds(5, tray_handler.check_joplin_status)
+
+    if args.test:
+        GLib.timeout_add_seconds(10, Gtk.main_quit)
 
     Gtk.main()
 
