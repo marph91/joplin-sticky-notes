@@ -5,12 +5,12 @@ block_cipher = None
 
 
 a = Analysis(
-    ['src/joplin_sticky_notes.py'],
+    ['../src/joplin_sticky_notes.py'],
     pathex=[],
     binaries=[],
     datas=[
-        ("ui/*", "ui"),
-        ("img/*", "img"),
+        ("../ui/*", "ui"),
+        ("../img/*", "img"),
     ],
     hiddenimports=[],
     hookspath=[],
