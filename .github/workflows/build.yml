@@ -1,0 +1,31 @@
+# Example: https://data-dive.com/multi-os-deployment-in-cloud-using-pyinstaller-and-github-actions
+
+name: build
+
+on: [push]
+
+jobs:
+  build:
+    name: Build packages
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: linux
+          - os: macos-latest
+            target: macos
+          - os: windows-latest
+            target: windows
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.10
+      - name: Build with pyinstaller for ${{matrix.os}}
+        run: ./build.sh ${{matrix.target}}
+      #- uses: actions/upload-artifact@v3
+      #  with:
+      #    name: my-artifact
+      #    path: path/to/artifact/world.txt
