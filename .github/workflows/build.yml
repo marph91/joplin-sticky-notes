@@ -33,4 +33,6 @@ jobs:
       #    name: my-artifact
       #    path: path/to/artifact/world.txt
       - name: Run the executable
-        run: ./dist/joplin-sticky-notes --test
+        run: |
+          . .venv/bin/activate
+          ./dist/joplin-sticky-notes --test

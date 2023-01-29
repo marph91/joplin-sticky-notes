@@ -2,7 +2,7 @@
 
 # https://pygobject.readthedocs.io/en/latest/getting_started.html
 if [ "$1" = "linux" ]; then
-    apt install python3-gi python3-gi-cairo gir1.2-gtk-3.0
+    sudo apt install python3-gi python3-gi-cairo gir1.2-gtk-3.0
 elif [ "$1" = "macos" ]; then
     brew install pygobject3 gtk+3
 elif [ "$1" = "windows" ]; then
