@@ -254,6 +254,8 @@
     <property name="enable-javascript">False</property>
     <property name="enable-xss-auditor">False</property>
     <property name="enable-hyperlink-auditing">False</property>
+    <property name="default-font-size">12</property>
+    <property name="default-monospace-font-size">12</property>
     <property name="enable-tabs-to-links">False</property>
     <property name="enable-fullscreen">False</property>
     <property name="print-backgrounds">False</property>
@@ -268,6 +270,7 @@
   <object class="GtkWindow" id="note_body">
     <property name="can-focus">False</property>
     <property name="skip-taskbar-hint">True</property>
+    <property name="accept-focus">False</property>
     <child>
       <object class="WebKitWebView" type-func="webkit_web_view_get_type" id="note_body_webview">
         <property name="visible">True</property>
