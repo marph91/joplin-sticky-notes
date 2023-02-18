@@ -241,17 +241,9 @@ class TitleBar(QWidget):
         )
 
     def on_choose_note_clicked(self):
-        # ignore any clicks on other windows
-        for note in nm.notes:
-            note["window"].setEnabled(False)
-
         NoteSelection(note_hierarchy, self)
 
     def set_note(self, note_title, note_id):
-        # enable the other windows again
-        for note in nm.notes:
-            note["window"].setEnabled(True)
-
         joplin_note = joplin_api.get_note(note_id, fields="body")
 
         # update ui
@@ -275,6 +267,7 @@ class NoteWindow(QFrame):
 
         # no titlebar
         # don't show in taskbar
+        # https://doc.qt.io/qt-6/qt.html#WindowType-enum
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.Tool)  #  | Qt.Tool | Qt.ToolTip
 
         # small border

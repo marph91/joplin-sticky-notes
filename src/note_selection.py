@@ -7,9 +7,11 @@ class NoteSelection(QTreeWidget):
     def __init__(self, hierarchy, parent):
         super().__init__(parent)
         self.parent = parent
-        self.setEnabled(True)
 
         self.setWindowFlags(Qt.Dialog)
+
+        # Make it the only clickable window.
+        self.setWindowModality(Qt.ApplicationModal)
 
         self.setWindowTitle("Choose Note")
 
