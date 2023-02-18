@@ -1,10 +1,13 @@
 from __future__ import annotations
 
-import json
+from collections import defaultdict
+from dataclasses import dataclass
 import sys
 import time
+from typing import List
 
 from joppy.api import Api
+import joppy.data_types as dt
 import requests
 
 
@@ -13,7 +16,7 @@ def request_api_token():
     # TODO: Make more robust.
 
     try:
-        response = requests.post("http://localhost:41184/auth")
+        response = requests.post("http://localhost:41184/auth", timeout=5)
         if response.status_code == 200:
             auth_token = response.json()["auth_token"]
         else:
@@ -23,7 +26,7 @@ def request_api_token():
 
     for _ in range(30):
         response = requests.get(
-            f"http://localhost:41184/auth/check?auth_token={auth_token}"
+            f"http://localhost:41184/auth/check?auth_token={auth_token}", timeout=5
         )
         if response.status_code == 200:
             data = response.json()
@@ -33,33 +36,14 @@ def request_api_token():
     return None
 
 
-def setup_joplin():
-    settings_file = Path().home() / ".joplin-sticky-notes/settings.json"
-    if settings_file.exists():
-        with open(settings_file) as infile:
-            settings = json.load(infile)
-        if (api_token := settings.get("api_token")) is None:
-            api_token = request_api_token()
-    else:
-        settings_file.parent.mkdir(exist_ok=True)
+def setup_joplin(settings):
+    if (api_token := settings.value("api_token", None)) is None:
         api_token = request_api_token()
     if api_token is None:
         sys.exit(1)
 
-    with open(settings_file, "w") as outfile:
-        json.dump({"api_token": api_token}, outfile, indent=2)
-
+    settings.setValue("api_token", api_token)
     return Api(token=api_token)
-
-
-import joppy.data_types as dt
-import argparse
-from collections import defaultdict
-from dataclasses import dataclass
-import os
-from pathlib import Path
-import re
-from typing import List
 
 
 @dataclass

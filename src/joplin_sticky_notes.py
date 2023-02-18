@@ -1,76 +1,62 @@
-# https://github.com/linuxmint/sticky/blob/8b8bf3025370be11a45b553db20e7cf193807a4a/usr/lib/sticky/sticky.py#L910
-# https://github.com/nieseman/traymenu/blob/main/traymenu/gtk.py
-
-from dataclasses import dataclass
-import json
+# pylint: disable=no-name-in-module,missing-function-docstring
 import os
-from pathlib import Path
-import time
+import sys
+import webbrowser
 
-import gi
-
-gi.require_version("Gtk", "3.0")
-gi.require_version("WebKit2", "4.1")
-from gi.repository import GLib, Gtk
-import gi.repository.WebKit2 as WebKit2
-from markdown import Markdown
+from PySide6.QtWidgets import (
+    QApplication,
+    QTextEdit,
+    QWidget,
+    QSystemTrayIcon,
+    QMenu,
+    QSizePolicy,
+    QSizeGrip,
+    QFrame,
+    QLayout,
+    QHBoxLayout,
+    QVBoxLayout,
+    QPushButton,
+    QToolButton,
+    QLabel,
+    QMainWindow
+)
+from PySide6.QtCore import Qt, QRect, QSettings, QTimer
+from PySide6.QtGui import QIcon, QAction
+import requests
 
 from joplin_api_helper import setup_joplin, create_hierarchy
-
-
-def get_size_(window):
-    """Convenience wrapper to get the window size as tuple:"""
-    size = window.get_size()
-    return (size.width, size.height)
-
-
-def get_position_(window, offset=(0, 0)):
-    """Convenience wrapper to get the window position as tuple:"""
-    position = window.get_position()
-    return (position.root_x + offset[0], position.root_y + offset[1])
+from note_selection import NoteSelection
 
 
 class NoteManager:
-    """Load and save notes."""
-
     def __init__(self):
-        # Needed to prevent:
-        # gi.repository.GLib.GError: gtk-builder-error-quark: note.glade:255:1 Invalid type function 'webkit_settings_get_type' (0)
-        WebKit2.WebView
+        # self.dummy_parent = QMainWindow()
+        # self.dummy_parent.setWindowFlags(Qt.Tool)
+        # self.dummy_parent.hide()
 
         self.notes = []
-        self.md = Markdown(extensions=["nl2br", "sane_lists", "tables"])
 
-        with open("ui/style.css") as infile:
-            style_sheet_content = "\n".join(infile.readlines())
-        self.webview_style_sheet = WebKit2.UserStyleSheet(
-            style_sheet_content,
-            WebKit2.UserContentInjectedFrames.ALL_FRAMES,
-            WebKit2.UserStyleLevel.USER,
-        )
+        # https://doc.qt.io/qtforpython/PySide6/QtCore/QSettings.html#locations-where-application-settings-are-stored
+        self.settings = QSettings("joplin-sticky-notes", "joplin-sticky-notes")
+        for index in range(self.settings.beginReadArray("notes")):
+            self.settings.setArrayIndex(index)
+            self.new_note(
+                self.settings.value("geometry"),
+                # QSettings seems to not support bool properly.
+                self.settings.value("visible") == "true",
+                self.settings.value("title"),
+                self.settings.value("content"),
+                self.settings.value("id"),
+            )
+        self.settings.endArray()
 
-        self.settings_file = Path().home() / ".joplin-sticky-notes/notes.json"
-        if self.settings_file.exists():
-            try:
-                with open(self.settings_file) as infile:
-                    saved_notes = json.load(infile)
-            except json.decoder.JSONDecodeError:
-                return  # no notes to import
-            for note in saved_notes:
-                self.new_note(**note)
-        else:
-            self.settings_file.parent.mkdir(exist_ok=True)
-        
-        if self.notes == []:
-            # We need at least one note as starting point.
-            self.new_note()
-
-    def check_joplin_status(self):
+    def check_joplin_status(self, timer):
         # TODO: Communicate via notification?
 
         try:
             joplin_api.ping()
             connected = True
+            timer.stop()
             print("Joplin Status: Connected")
         except requests.exceptions.ConnectionError:
             connected = False
@@ -80,206 +66,330 @@ class NoteManager:
 
     def new_note(
         self,
-        position=(40, 40),
-        size=(400, 200),
+        geometry=QRect(40, 40, 400, 300),
         visible=True,
         title="New Note",
         content="",
-        id=None,
+        id_=None,
     ):
 
-        # Create a new builder for each note.
-        builder = Gtk.Builder()
-        builder.add_from_file("ui/note.glade")
-
-        # Link the popover menu manually, since populating it doesn't work in glade.
-        # https://gitlab.gnome.org/GNOME/glade/-/issues/509
-        configure_menu = builder.get_object("configure_menu")
-        configure_menu_button = builder.get_object("configure_menu_button")
-        configure_menu_button.set_popup(configure_menu)
-
-        # final note layout
-        note_window = builder.get_object("note_body")
-        title_bar = builder.get_object("note_title")
-        note_window.set_titlebar(title_bar)
-        note_window.move(*position)
-        note_window.show_all()
-
-        body = note_window.get_child()
-        # Inject a custom style sheet to apply light/dark theme in the webview.
-        content_manager = body.get_user_content_manager()
-        content_manager.add_style_sheet(self.webview_style_sheet)
-        # https://webkitgtk.org/reference/webkit2gtk/stable/method.WebView.load_html.html
-        body.load_html(self.md.convert(content), "")
-
-        if visible:
-            note_window.resize(*size)
-        else:
-            note_window.resize(size[0], 1)
-        body.set_visible(visible)
-
-        note_window.set_title(title)
+        window = NoteWindow()
+        window.setGeometry(geometry)
+        window.note_body.setVisible(visible)
+        window.grip.setVisible(visible)
+        window.title_bar.label.setText(title)
+        window.note_body.setMarkdown(content)
+        window.show()
+        window.activateWindow()
+        window.raise_()
 
         self.notes.append(
             {
-                "window": note_window,
+                "window": window,
                 "title": title,
                 "content": content,
-                "id": id,
+                "id": id_,
             }
         )
-
-        builder.connect_signals(NoteHandler(note_window))
 
     def delete_note(self, note_window):
         self.notes = [note for note in self.notes if note["window"] != note_window]
 
     def save_notes(self):
         print("save", len(self.notes))
-        notes_to_save = []
-        for note in self.notes:
-            note_window = note["window"]
-            notes_to_save.append(
-                {
-                    "position": get_position_(note_window),
-                    "size": get_size_(note_window),
-                    "visible": note_window.get_child().props.visible,
-                    # Store all other data except of the window.
-                    **{key: note[key] for key in note if key != "window"},
-                }
-            )
-        with open(self.settings_file, "w") as outfile:
-            json.dump(notes_to_save, outfile, indent=2)
 
-        return True  # To keep the loop running.
+        self.settings.beginWriteArray("notes", size=len(self.notes))
+        for index, note in enumerate(self.notes):
+            self.settings.setArrayIndex(index)
+            self.settings.setValue("geometry", note["window"].geometry())
+            self.settings.setValue("visible", note["window"].note_body.isVisible())
+            self.settings.setValue("title", note["title"])
+            self.settings.setValue("content", note["content"])
+            self.settings.setValue("id", note["id"])
+        self.settings.endArray()
 
 
-class NoteHandler:
-    """Handles all clicks inside a note."""
+class TitleBar(QWidget):
+    def __init__(self, parent):
+        super().__init__()
+        self.parent = parent
 
-    def __init__(self, note_window):
-        # Default values to avoid errors after restart.
-        self.position_before_hide = (40, 40)
-        self.size_before_hide = (400, 200)
+        self.layout = QHBoxLayout()
+        self.layout.setSizeConstraint(QLayout.SetDefaultConstraint)
+        self.layout.setContentsMargins(0, 0, 0, 0)
 
-        self.selected_note = None
+        # toggle body button
+        self.toggle_body_button = QPushButton()
+        size_policy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.toggle_body_button.setSizePolicy(size_policy)
+        icon = QIcon(QIcon.fromTheme("view-fullscreen"))
+        self.toggle_body_button.setIcon(icon)
+        self.layout.addWidget(self.toggle_body_button)
 
-        self.note_window = note_window
+        # note title
+        self.label = QLabel("New Note")
+        self.label.setAlignment(Qt.AlignCenter)
+        self.layout.addWidget(self.label)
 
-    def on_show_hide_body_clicked(self, button):
-        body = self.note_window.get_child()
-        if body.props.visible:
-            size = self.note_window.get_size()
-            self.size_before_hide = (size.width, size.height)
-            self.note_window.resize(size.width, 1)
+        # configure menu
+        self.configure_menu = QMenu()
+
+        self.choose_note = QAction("Choose Joplin Note")
+        self.choose_note.triggered.connect(self.on_choose_note_clicked)
+        self.configure_menu.addAction(self.choose_note)
+
+        self.update = QAction("Update")
+        self.update.triggered.connect(self.on_update_hierarchy_clicked)
+        self.configure_menu.addAction(self.update)
+
+        self.open_joplin = QAction("Open in Joplin")
+        self.open_joplin.triggered.connect(self.on_open_joplin_clicked)
+        self.configure_menu.addAction(self.open_joplin)
+
+        self.information_menu = QMenu("Information")
+
+        self.info_parent = QAction("Parent")
+        self.info_parent.setEnabled(False)
+        self.information_menu.addAction(self.info_parent)
+        self.info_id = QAction("ID")
+        self.info_id.setEnabled(False)
+        self.information_menu.addAction(self.info_id)
+        self.info_created = QAction("Created")
+        self.info_created.setEnabled(False)
+        self.information_menu.addAction(self.info_created)
+        self.info_due = QAction("Due")
+        self.info_due.setEnabled(False)
+        self.information_menu.addAction(self.info_due)
+
+        self.configure_menu.addMenu(self.information_menu)
+
+        # configure button
+        self.configure_button = QToolButton()
+        self.configure_button.setDefaultAction(self.choose_note)
+        icon1 = QIcon(QIcon.fromTheme("preferences-system"))
+        self.configure_button.setIcon(icon1)
+        self.configure_button.setPopupMode(QToolButton.MenuButtonPopup)
+        self.configure_button.setMenu(self.configure_menu)
+        self.layout.addWidget(self.configure_button)
+
+        # clone button
+        self.clone_button = QPushButton()
+        self.clone_button.setSizePolicy(size_policy)
+        icon2 = QIcon(QIcon.fromTheme("edit-copy"))
+        self.clone_button.setIcon(icon2)
+        self.layout.addWidget(self.clone_button)
+
+        # delete button
+        self.delete_button = QPushButton()
+        self.delete_button.setSizePolicy(size_policy)
+        icon3 = QIcon(QIcon.fromTheme("edit-clear"))
+        self.delete_button.setIcon(icon3)
+        self.delete_button.setFlat(False)
+        self.layout.addWidget(self.delete_button)
+
+        self.setLayout(self.layout)
+
+        # callbacks
+        self.toggle_body_button.clicked.connect(self.on_toggle_body_clicked)
+        self.clone_button.clicked.connect(self.on_clone_clicked)
+        self.delete_button.clicked.connect(self.on_close_clicked)
+
+        self.height_before = 0
+
+    def on_toggle_body_clicked(self):
+        target_visibility = not self.parent.note_body.isVisible()
+        self.parent.note_body.setVisible(target_visibility)
+        self.parent.grip.setVisible(target_visibility)
+
+        width_before = self.parent.geometry().width()
+        if not target_visibility:
+            # Save the height if the note is going to be hidden.
+            self.height_before = self.parent.geometry().height()
+            new_height = 0
         else:
-            self.note_window.resize(*self.size_before_hide)
-        body.set_visible(not body.props.visible)
+            new_height = self.height_before
+        # shrink the window after body isn't visible anymore
+        self.parent.adjustSize()
 
-    def on_note_selection_changed(self, selection):
-        # https://stackoverflow.com/a/7938561/7410886
-        model, pathlist = selection.get_selected_rows()
-        for path in pathlist:
-            tree_iter = model.get_iter(path)
-            self.selected_note = model[tree_iter][:]
-            return  # should be a single selected value anyway
+        # TODO: look for clean solution
+        self.parent.resize(width_before, new_height)
 
-    def on_clone_clicked(self, button):
-        note = [note for note in nm.notes if note["window"] == self.note_window][0]
-        body = self.note_window.get_child()
+    def on_clone_clicked(self):
+        window = self.window()
+        note = [note for note in nm.notes if note["window"] == window][0]
+        # move clone slightly
+        geometry = window.geometry()
+        geometry.adjust(20, 20, 20, 20)
         nm.new_note(
-            get_position_(self.note_window, offset=(20, 20)),
-            get_size_(self.note_window),
-            body.props.visible,
+            geometry,
+            window.note_body.isVisible(),
             note["title"],
             note["content"],
             note["id"],
         )
 
-    def on_delete_clicked(self, button):
-        if len(nm.notes) == 1:
-            print("Quit")
-            Gtk.main_quit()
-            return
-        nm.delete_note(self.note_window)
-        self.note_window.destroy()
+    def on_close_clicked(self):
+        window = self.window()
+        nm.notes = [note for note in nm.notes if note["window"] != window]
+        self.parent.close()
 
-    def on_quit_activate(self, *args):
-        Gtk.main_quit()
+    def on_open_joplin_clicked(self):
+        # https://joplinapp.org/external_links
+        # TODO: more elegant way (requests doesn't work)
+        webbrowser.open(
+            "joplin://x-callback-url/openNote?id=6bcade4e7298483d91cff4dd854cd7a7"
+        )
 
-    # Note selection window
+    def on_choose_note_clicked(self):
+        # ignore any clicks on other windows
+        for note in nm.notes:
+            note["window"].setEnabled(False)
 
-    def on_update_notes_clicked(self, button):
+        NoteSelection(note_hierarchy, self)
+
+    def set_note(self, note_title, note_id):
+        # enable the other windows again
+        for note in nm.notes:
+            note["window"].setEnabled(True)
+
+        joplin_note = joplin_api.get_note(note_id, fields="body")
+
+        # update ui
+        self.label.setText(note_title)
+        self.parent.note_body.setMarkdown(joplin_note.body)
+
+        # update note manager
+        note = [note for note in nm.notes if note["window"] == self.window()][0]
+        note["title"] = note_title
+        note["content"] = joplin_note.body
+        note["id"] = note_id
+
+    def on_update_hierarchy_clicked(self):
         global note_hierarchy
         note_hierarchy = create_hierarchy(joplin_api)
 
-        # TODO: simple update the treestore
-        button.get_window().destroy()
-        self.on_choose_joplin_note_activate()
 
-    def on_select_note_clicked(self, button):
-        if self.selected_note is not None and self.selected_note[1] is not None:
+class NoteWindow(QFrame):
+    def __init__(self):
+        super().__init__()
 
-            # update the ui
-            self.note_window.set_title(self.selected_note[0])
-            # TODO: add other infos
-            body = self.note_window.get_child()
-            joplin_note = joplin_api.get_note(self.selected_note[1], fields="body")
-            body.load_html(nm.md.convert(joplin_note.body), "")
-            button.get_window().destroy()
+        # no titlebar
+        # don't show in taskbar
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Tool)  #  | Qt.Tool | Qt.ToolTip
 
-            # update the note manager
-            note = [note for note in nm.notes if note["window"] == self.note_window][0]
-            note["title"] = self.selected_note[0]
-            note["content"] = joplin_note.body
-            note["id"] = self.selected_note[1]
-        else:
-            print("Invalid selection")
+        # small border
+        self.setFrameStyle(QFrame.Box | QFrame.Plain)
 
-    def on_choose_joplin_note_activate(self, *args):
-        # https://stackoverflow.com/a/74833667/7410886
-        # https://www.tutorialspoint.com/pygtk/pygtk_treeview_class.htm
-        builder = Gtk.Builder()
-        builder.add_from_file("ui/note.glade")
-        builder.connect_signals(self)
+        self.layout = QVBoxLayout()
+        self.layout.setSizeConstraint(QLayout.SetDefaultConstraint)
 
-        # Fill tree with data.
-        def populate_store_from_hierarchy(store, hierarchy, root=None):
-            for item in hierarchy:
-                new_root = store.append(root, [item.data.title, None])
-                populate_store_from_hierarchy(store, item.child_items, new_root)
-                for note in item.child_notes:
-                    store.append(new_root, [note.title, note.id])
+        # note title
+        self.title_bar = TitleBar(self)
+        self.layout.addWidget(self.title_bar)
 
-        store = builder.get_object("note_selection_store")
-        populate_store_from_hierarchy(store, note_hierarchy)
+        # note body
+        self.note_body = QTextEdit()
+        size_policy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.note_body.setSizePolicy(size_policy)
+        self.note_body.setFrameShadow(QFrame.Sunken)
+        self.note_body.setReadOnly(True)
+        self.layout.addWidget(self.note_body)
 
-        # TODO: possible from glade?
-        treeview = builder.get_object("note_selection_tree")
-        treeview.expand_all()
-        window = builder.get_object("note_selection_window")
-        window.show_all()
+        # grip at bottom right
+        self.grip_size = 20
+        self.grip = QSizeGrip(self)
+        self.grip.resize(self.grip_size, self.grip_size)
+
+        self.setLayout(self.layout)
+
+    # def changeEvent(self, event):
+    #     # https://stackoverflow.com/a/74052370/7410886
+    #     if event.type() == QEvent.WindowStateChange:
+    #         self.title_bar.windowStateChanged(self.windowState())
+
+    def resizeEvent(self, event):  # pylint: disable=invalid-name
+        rect = self.rect()
+        self.grip.move(
+            rect.right() - self.grip.width(), rect.bottom() - self.grip.height()
+        )
+
+    def mousePressEvent(self, event):  # pylint: disable=invalid-name
+        if event.button() == Qt.LeftButton:
+            self.click_pos = event.scenePosition().toPoint()
+
+    def mouseMoveEvent(self, event):  # pylint: disable=invalid-name
+        if hasattr(self, "click_pos") and self.click_pos is not None:
+            self.window().move(event.globalPosition().toPoint() - self.click_pos)
 
 
 def main():
+    app.setQuitOnLastWindowClosed(False)
 
-    # Save the notes every 5 seconds.
-    GLib.timeout_add_seconds(5, nm.save_notes)
+    save_timer = QTimer()
+    save_timer.timeout.connect(nm.save_notes)
+    save_timer.start(5000)
 
-    # Try to connect to joplin every 5 seconds.
-    # Stops if the connection was successful.
-    GLib.timeout_add_seconds(5, nm.check_joplin_status)
+    connect_timer = QTimer()
+    connect_timer.timeout.connect(lambda: nm.check_joplin_status(connect_timer))
+    connect_timer.start(1000)
 
-    if is_test:
-        GLib.timeout_add_seconds(1, Gtk.main_quit)
+    # TODO: check joplin status
 
-    Gtk.main()
+    #################create_tray_menu(app)
+    # tray: https://www.pythonguis.com/tutorials/pyside6-system-tray-mac-menu-bar-applications/
+    # tray icon
+    tray = QSystemTrayIcon()
+    icon = QIcon("img/logo_96_blue.png")
+    tray.setIcon(icon)
+    tray.setVisible(True)
+
+    # tray menu
+    menu = QMenu()
+
+    new_note = QAction("New Note")
+    new_note.triggered.connect(nm.new_note)
+    menu.addAction(new_note)
+
+    def show_all_notes():
+        # https://stackoverflow.com/a/26316185/7410886
+
+        for note in nm.notes:
+            note["window"].show()
+            note["window"].activateWindow()
+            note["window"].raise_()
+
+    show_all = QAction("Show All")
+    show_all.triggered.connect(show_all_notes)
+    menu.addAction(show_all)
+
+    def hide_all_notes():
+        for note in nm.notes:
+            note["window"].hide()
+
+    hide_all = QAction("Hide All")
+    hide_all.triggered.connect(hide_all_notes)
+    menu.addAction(hide_all)
+
+    quit_ = QAction("Quit")
+    quit_.triggered.connect(app.quit)
+    menu.addAction(quit_)
+
+    tray.setContextMenu(menu)
+    #################
+
+    sys.exit(app.exec())
 
 
 if __name__ == "__main__":
+    # TODO: how to test light mode?
+    # app = QApplication(['-platform', 'windows:lightmode=2'])
+    app = QApplication([])
+
+    nm = NoteManager()
+
     is_test = bool(os.getenv("TEST"))
     if not is_test:
-        joplin_api = setup_joplin()
+        joplin_api = setup_joplin(nm.settings)
         note_hierarchy = create_hierarchy(joplin_api)
-    nm = NoteManager()
+
     main()
