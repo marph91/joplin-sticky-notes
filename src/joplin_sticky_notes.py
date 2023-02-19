@@ -350,11 +350,13 @@ def main():
     tray.setVisible(True)
 
     # tray menu
-    menu = QMenu()
+    tray_menu = QMenu()
 
     new_note = QAction("New Note")
     new_note.triggered.connect(nm.new_note)
-    menu.addAction(new_note)
+    tray_menu.addAction(new_note)
+
+    # visibility (show/hide all)
 
     def show_all_notes():
         # https://stackoverflow.com/a/26316185/7410886
@@ -364,24 +366,25 @@ def main():
             note["window"].activateWindow()
             note["window"].raise_()
 
-    show_all = QAction("Show All")
-    show_all.triggered.connect(show_all_notes)
-    menu.addAction(show_all)
-
     def hide_all_notes():
         for note in nm.notes:
             note["window"].hide()
 
+    visibility_menu = QMenu("Visibility")
+    show_all = QAction("Show All")
+    show_all.triggered.connect(show_all_notes)
+    visibility_menu.addAction(show_all)
     hide_all = QAction("Hide All")
     hide_all.triggered.connect(hide_all_notes)
-    menu.addAction(hide_all)
+    visibility_menu.addAction(hide_all)
+    tray_menu.addMenu(visibility_menu)
 
+    # quit
     quit_ = QAction("Quit")
     quit_.triggered.connect(app.quit)
-    menu.addAction(quit_)
+    tray_menu.addAction(quit_)
 
-    tray.setContextMenu(menu)
-    #################
+    tray.setContextMenu(tray_menu)
 
     sys.exit(app.exec())
 
