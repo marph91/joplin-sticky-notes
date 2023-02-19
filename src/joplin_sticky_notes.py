@@ -70,7 +70,8 @@ class NoteManager:
         id_=None,
     ):
 
-        window = NoteWindow()
+        window = NoteWindow(id_)
+        window.title_bar.info_id.setText(f"ID: {window.joplin_id}")
         window.setGeometry(geometry)
         window.grip.setVisible(note_visible)
         window.note_body.setVisible(body_visible)
@@ -82,30 +83,21 @@ class NoteManager:
             window.activateWindow()
             window.raise_()
 
-        self.notes.append(
-            {
-                "window": window,
-                "title": title,
-                "content": content,
-                "id": id_,
-            }
-        )
-
-    def delete_note(self, note_window):
-        self.notes = [note for note in self.notes if note["window"] != note_window]
+        # Identify by window, since the windows can have the same title or id.
+        self.notes.append(window)
 
     def save_notes(self):
         print("save", len(self.notes))
 
         self.settings.beginWriteArray("notes", size=len(self.notes))
-        for index, note in enumerate(self.notes):
+        for index, window in enumerate(self.notes):
             self.settings.setArrayIndex(index)
-            self.settings.setValue("geometry", note["window"].geometry())
-            self.settings.setValue("note_visible", note["window"].isVisible())
-            self.settings.setValue("body_visible", note["window"].note_body.isVisible())
-            self.settings.setValue("title", note["title"])
-            self.settings.setValue("content", note["content"])
-            self.settings.setValue("id", note["id"])
+            self.settings.setValue("geometry", window.geometry())
+            self.settings.setValue("note_visible", window.isVisible())
+            self.settings.setValue("body_visible", window.note_body.isVisible())
+            self.settings.setValue("title", window.title_bar.label.text())
+            self.settings.setValue("content", window.note_body.toMarkdown())
+            self.settings.setValue("id", window.joplin_id)
         self.settings.endArray()
 
 
@@ -216,7 +208,6 @@ class TitleBar(QWidget):
 
     def on_clone_clicked(self):
         window = self.window()
-        note = [note for note in nm.notes if note["window"] == window][0]
         # move clone slightly
         geometry = window.geometry()
         geometry.adjust(20, 20, 20, 20)
@@ -224,36 +215,31 @@ class TitleBar(QWidget):
             geometry,
             window.isVisible(),
             window.note_body.isVisible(),
-            note["title"],
-            note["content"],
-            note["id"],
+            window.title_bar.label.text(),
+            window.note_body.toMarkdown(),
+            window.joplin_id,
         )
 
     def on_close_clicked(self):
+        nm.notes.remove(self.parent)
         self.parent.close()
 
     def on_open_joplin_clicked(self):
-        note_id = [note["id"] for note in nm.notes if note["window"] != self.window()][0]
-
         # https://joplinapp.org/external_links
         # TODO: more elegant way (requests doesn't work)
-        webbrowser.open(f"joplin://x-callback-url/openNote?id={note_id}")
+        webbrowser.open(f"joplin://x-callback-url/openNote?id={self.parent.joplin_id}")
 
     def on_choose_note_clicked(self):
         NoteSelection(note_hierarchy, self)
 
     def set_note(self, note_title, note_id):
         joplin_note = joplin_api.get_note(note_id, fields="body")
+        self.parent.joplin_id = note_id
 
         # update ui
         self.label.setText(note_title)
         self.parent.note_body.setMarkdown(joplin_note.body)
-
-        # update note manager
-        note = [note for note in nm.notes if note["window"] == self.window()][0]
-        note["title"] = note_title
-        note["content"] = joplin_note.body
-        note["id"] = note_id
+        self.info_id.setText(f"ID: {note_id}")
 
     def on_update_hierarchy_clicked(self):
         global note_hierarchy
@@ -261,7 +247,7 @@ class TitleBar(QWidget):
 
 
 class NoteWindow(QFrame):
-    def __init__(self):
+    def __init__(self, joplin_id):
         super().__init__()
 
         # small border
@@ -297,6 +283,9 @@ class NoteWindow(QFrame):
 
         # for moving
         self.click_pos = None
+
+        # some joplin specific infos
+        self.joplin_id = joplin_id
 
     # def changeEvent(self, event):
     #     # https://stackoverflow.com/a/74052370/7410886
@@ -360,13 +349,13 @@ def main():
         # https://stackoverflow.com/a/26316185/7410886
 
         for note in nm.notes:
-            note["window"].show()
-            note["window"].activateWindow()
-            note["window"].raise_()
+            note.show()
+            note.activateWindow()
+            note.raise_()
 
     def hide_all_notes():
         for note in nm.notes:
-            note["window"].hide()
+            note.hide()
 
     visibility_menu = QMenu("Visibility")
     show_all = QAction("Show All")
