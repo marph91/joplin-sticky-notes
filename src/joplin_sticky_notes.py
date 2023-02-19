@@ -38,7 +38,8 @@ class NoteManager:
             self.new_note(
                 self.settings.value("geometry"),
                 # QSettings seems to not support bool properly.
-                self.settings.value("visible") == "true",
+                self.settings.value("note_visible") == "true",
+                self.settings.value("body_visible") == "true",
                 self.settings.value("title"),
                 self.settings.value("content"),
                 self.settings.value("id"),
@@ -62,7 +63,8 @@ class NoteManager:
     def new_note(
         self,
         geometry=QRect(40, 40, 400, 300),
-        visible=True,
+        note_visible=True,
+        body_visible=True,
         title="New Note",
         content="",
         id_=None,
@@ -70,13 +72,15 @@ class NoteManager:
 
         window = NoteWindow()
         window.setGeometry(geometry)
-        window.note_body.setVisible(visible)
-        window.grip.setVisible(visible)
+        window.grip.setVisible(note_visible)
+        window.note_body.setVisible(body_visible)
+        window.grip.setVisible(body_visible)
         window.title_bar.label.setText(title)
         window.note_body.setMarkdown(content)
-        window.show()
-        window.activateWindow()
-        window.raise_()
+        if note_visible:
+            window.show()
+            window.activateWindow()
+            window.raise_()
 
         self.notes.append(
             {
@@ -97,7 +101,8 @@ class NoteManager:
         for index, note in enumerate(self.notes):
             self.settings.setArrayIndex(index)
             self.settings.setValue("geometry", note["window"].geometry())
-            self.settings.setValue("visible", note["window"].note_body.isVisible())
+            self.settings.setValue("note_visible", note["window"].isVisible())
+            self.settings.setValue("body_visible", note["window"].note_body.isVisible())
             self.settings.setValue("title", note["title"])
             self.settings.setValue("content", note["content"])
             self.settings.setValue("id", note["id"])
@@ -113,14 +118,6 @@ class TitleBar(QWidget):
         self.layout.setSizeConstraint(QLayout.SetDefaultConstraint)
         self.layout.setContentsMargins(0, 0, 0, 0)
 
-        # toggle body button
-        self.toggle_body_button = QPushButton()
-        size_policy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        self.toggle_body_button.setSizePolicy(size_policy)
-        icon = QIcon(QIcon.fromTheme("view-fullscreen"))
-        self.toggle_body_button.setIcon(icon)
-        self.layout.addWidget(self.toggle_body_button)
-
         # note title
         self.label = QLabel("New Note")
         self.label.setAlignment(Qt.AlignCenter)
@@ -128,6 +125,16 @@ class TitleBar(QWidget):
 
         # configure menu
         self.configure_menu = QMenu()
+
+        self.visibility_menu = QMenu("Toggle Visibility")
+        # note is always visible when clicked
+        self.hide_note = QAction("Note")
+        self.hide_note.triggered.connect(lambda: self.parent.setVisible(False))
+        self.visibility_menu.addAction(self.hide_note)
+        self.toggle_body = QAction("Body")
+        self.toggle_body.triggered.connect(self.on_toggle_body_clicked)
+        self.visibility_menu.addAction(self.toggle_body)
+        self.configure_menu.addMenu(self.visibility_menu)
 
         self.choose_note = QAction("Choose Joplin Note")
         self.choose_note.triggered.connect(self.on_choose_note_clicked)
@@ -142,7 +149,6 @@ class TitleBar(QWidget):
         self.configure_menu.addAction(self.open_joplin)
 
         self.information_menu = QMenu("Information")
-
         self.info_parent = QAction("Parent")
         self.info_parent.setEnabled(False)
         self.information_menu.addAction(self.info_parent)
@@ -155,7 +161,6 @@ class TitleBar(QWidget):
         self.info_due = QAction("Due")
         self.info_due.setEnabled(False)
         self.information_menu.addAction(self.info_due)
-
         self.configure_menu.addMenu(self.information_menu)
 
         # configure button
@@ -169,6 +174,7 @@ class TitleBar(QWidget):
 
         # clone button
         self.clone_button = QPushButton()
+        size_policy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.clone_button.setSizePolicy(size_policy)
         icon2 = QIcon(QIcon.fromTheme("edit-copy"))
         self.clone_button.setIcon(icon2)
@@ -185,7 +191,6 @@ class TitleBar(QWidget):
         self.setLayout(self.layout)
 
         # callbacks
-        self.toggle_body_button.clicked.connect(self.on_toggle_body_clicked)
         self.clone_button.clicked.connect(self.on_clone_clicked)
         self.delete_button.clicked.connect(self.on_close_clicked)
 
@@ -217,6 +222,7 @@ class TitleBar(QWidget):
         geometry.adjust(20, 20, 20, 20)
         nm.new_note(
             geometry,
+            window.isVisible(),
             window.note_body.isVisible(),
             note["title"],
             note["content"],
@@ -266,7 +272,7 @@ class NoteWindow(QFrame):
         self.layout = QVBoxLayout()
         self.layout.setSizeConstraint(QLayout.SetDefaultConstraint)
 
-        # note title
+        # note title and buttons
         self.title_bar = TitleBar(self)
         self.layout.addWidget(self.title_bar)
 
