@@ -315,37 +315,40 @@ class NoteWindow(QFrame):
             self.window().move(event.globalPosition().toPoint() - self.click_pos)
 
 
-def main():
-    app.setQuitOnLastWindowClosed(False)
+class Tray(QSystemTrayIcon):
+    def __init__(self, parent):
+        super().__init__(parent)
 
-    save_timer = QTimer()
-    save_timer.timeout.connect(nm.save_notes)
-    save_timer.start(5000)
+        # icon
+        self.setIcon(QIcon("img/logo_96_blue.png"))
+        self.setVisible(True)
 
-    connect_timer = QTimer()
-    connect_timer.timeout.connect(lambda: nm.check_joplin_status(connect_timer))
-    connect_timer.start(1000)
+        # menu
+        self.tray_menu = QMenu()
 
-    # TODO: check joplin status
+        # new note
+        self.new_note = QAction("New Note")
+        self.new_note.triggered.connect(nm.new_note)
+        self.tray_menu.addAction(self.new_note)
 
-    #################create_tray_menu(app)
-    # tray: https://www.pythonguis.com/tutorials/pyside6-system-tray-mac-menu-bar-applications/
-    # tray icon
-    tray = QSystemTrayIcon()
-    icon = QIcon("img/logo_96_blue.png")
-    tray.setIcon(icon)
-    tray.setVisible(True)
+        # visibility (show/hide all)
+        self.visibility_menu = QMenu("Visibility")
+        self.show_all = QAction("Show All")
+        self.show_all.triggered.connect(self.show_all_notes)
+        self.visibility_menu.addAction(self.show_all)
+        self.hide_all = QAction("Hide All")
+        self.hide_all.triggered.connect(self.hide_all_notes)
+        self.visibility_menu.addAction(self.hide_all)
+        self.tray_menu.addMenu(self.visibility_menu)
 
-    # tray menu
-    tray_menu = QMenu()
+        # quit
+        self.quit_ = QAction("Quit")
+        self.quit_.triggered.connect(app.quit)
+        self.tray_menu.addAction(self.quit_)
 
-    new_note = QAction("New Note")
-    new_note.triggered.connect(nm.new_note)
-    tray_menu.addAction(new_note)
+        self.setContextMenu(self.tray_menu)
 
-    # visibility (show/hide all)
-
-    def show_all_notes():
+    def show_all_notes(self):
         # https://stackoverflow.com/a/26316185/7410886
 
         for note in nm.notes:
@@ -353,33 +356,16 @@ def main():
             note.activateWindow()
             note.raise_()
 
-    def hide_all_notes():
+    def hide_all_notes(self):
         for note in nm.notes:
             note.hide()
-
-    visibility_menu = QMenu("Visibility")
-    show_all = QAction("Show All")
-    show_all.triggered.connect(show_all_notes)
-    visibility_menu.addAction(show_all)
-    hide_all = QAction("Hide All")
-    hide_all.triggered.connect(hide_all_notes)
-    visibility_menu.addAction(hide_all)
-    tray_menu.addMenu(visibility_menu)
-
-    # quit
-    quit_ = QAction("Quit")
-    quit_.triggered.connect(app.quit)
-    tray_menu.addAction(quit_)
-
-    tray.setContextMenu(tray_menu)
-
-    sys.exit(app.exec())
 
 
 if __name__ == "__main__":
     # TODO: how to test light mode?
     # app = QApplication(['-platform', 'windows:lightmode=2'])
     app = QApplication([])
+    app.setQuitOnLastWindowClosed(False)
 
     nm = NoteManager()
 
@@ -388,4 +374,17 @@ if __name__ == "__main__":
         joplin_api = setup_joplin(nm.settings)
         note_hierarchy = create_hierarchy(joplin_api)
 
-    main()
+    # tray menu
+    Tray(app)
+
+    # timer
+    save_timer = QTimer()
+    save_timer.timeout.connect(nm.save_notes)
+    save_timer.start(5000)
+
+    # TODO: check joplin status
+    connect_timer = QTimer()
+    connect_timer.timeout.connect(lambda: nm.check_joplin_status(connect_timer))
+    connect_timer.start(1000)
+
+    sys.exit(app.exec())
