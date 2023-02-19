@@ -18,9 +18,8 @@ from PySide6.QtWidgets import (
     QPushButton,
     QToolButton,
     QLabel,
-    QMainWindow
 )
-from PySide6.QtCore import Qt, QRect, QSettings, QTimer
+from PySide6.QtCore import Qt, QRect, QSettings, QTimer, QPoint
 from PySide6.QtGui import QIcon, QAction
 import requests
 
@@ -30,10 +29,6 @@ from note_selection import NoteSelection
 
 class NoteManager:
     def __init__(self):
-        # self.dummy_parent = QMainWindow()
-        # self.dummy_parent.setWindowFlags(Qt.Tool)
-        # self.dummy_parent.hide()
-
         self.notes = []
 
         # https://doc.qt.io/qtforpython/PySide6/QtCore/QSettings.html#locations-where-application-settings-are-stored
@@ -265,11 +260,6 @@ class NoteWindow(QFrame):
     def __init__(self):
         super().__init__()
 
-        # no titlebar
-        # don't show in taskbar
-        # https://doc.qt.io/qt-6/qt.html#WindowType-enum
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Tool)  #  | Qt.Tool | Qt.ToolTip
-
         # small border
         self.setFrameStyle(QFrame.Box | QFrame.Plain)
 
@@ -295,6 +285,15 @@ class NoteWindow(QFrame):
 
         self.setLayout(self.layout)
 
+        # https://doc.qt.io/qt-6/qt.html#WindowType-enum
+        # https://stackoverflow.com/a/4058002/7410886
+        # no titlebar
+        # don't show in taskbar
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.BypassWindowManagerHint)
+
+        # for moving
+        self.click_pos = None
+
     # def changeEvent(self, event):
     #     # https://stackoverflow.com/a/74052370/7410886
     #     if event.type() == QEvent.WindowStateChange:
@@ -309,6 +308,14 @@ class NoteWindow(QFrame):
     def mousePressEvent(self, event):  # pylint: disable=invalid-name
         if event.button() == Qt.LeftButton:
             self.click_pos = event.scenePosition().toPoint()
+
+            # Somehow the selected window doesn't get on top always.
+            # TODO: remove this hack
+            window = self.window()
+            window.activateWindow()
+            window.raise_()
+            window.move(self.window().pos() + QPoint(1, 1))
+            window.move(self.window().pos() - QPoint(1, 1))
 
     def mouseMoveEvent(self, event):  # pylint: disable=invalid-name
         if hasattr(self, "click_pos") and self.click_pos is not None:
