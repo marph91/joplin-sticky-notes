@@ -230,16 +230,14 @@ class TitleBar(QWidget):
         )
 
     def on_close_clicked(self):
-        window = self.window()
-        nm.notes = [note for note in nm.notes if note["window"] != window]
         self.parent.close()
 
     def on_open_joplin_clicked(self):
+        note_id = [note["id"] for note in nm.notes if note["window"] != self.window()][0]
+
         # https://joplinapp.org/external_links
         # TODO: more elegant way (requests doesn't work)
-        webbrowser.open(
-            "joplin://x-callback-url/openNote?id=6bcade4e7298483d91cff4dd854cd7a7"
-        )
+        webbrowser.open(f"joplin://x-callback-url/openNote?id={note_id}")
 
     def on_choose_note_clicked(self):
         NoteSelection(note_hierarchy, self)
