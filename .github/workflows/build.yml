@@ -27,7 +27,7 @@ jobs:
         run: python -m PyInstaller joplin_sticky_notes.spec --noconfirm
       - uses: actions/upload-artifact@v3
         with:
-          name: joplin-sticky-notes
+          name: joplin-sticky-notes-${{ matrix.os }}
           path: ./dist/joplin-sticky-notes
       - name: Run the executable
         run: ./dist/joplin-sticky-notes
