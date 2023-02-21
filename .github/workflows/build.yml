@@ -28,6 +28,6 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: joplin-sticky-notes-${{ matrix.os }}
-          path: ./dist/joplin-sticky-notes
+          path: ./dist/*
       - name: Run the executable
         run: ./dist/joplin-sticky-notes
