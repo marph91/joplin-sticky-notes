@@ -5,26 +5,15 @@ block_cipher = None
 
 
 a = Analysis(
-    ['../src/joplin_sticky_notes.py'],
+    ["src/joplin_sticky_notes.py"],
     pathex=[],
     binaries=[],
     datas=[
-        ("../ui/*", "ui"),
         ("../img/*", "img"),
     ],
     hiddenimports=[],
     hookspath=[],
-    # https://pyinstaller.org/en/stable/hooks-config.html#gobject-introspection-gi-hooks
-    hooksconfig={
-        "gi": {
-            "icons": [],
-            "themes": [],
-            "languages": [],
-            "module-versions": {
-                "Gtk": "3.0",
-            },
-        },
-    },
+    hooksconfig={},
     runtime_hooks=[],
     excludes=["numpy"],
     win_no_prefer_redirects=False,
@@ -41,7 +30,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='joplin-sticky-notes',
+    name="joplin-sticky-notes",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -59,11 +48,11 @@ exe = EXE(
 # for debugging
 coll = COLLECT(
     exe,
-	a.binaries,
-	a.zipfiles,
-	a.datas,
-	strip=False,
-	upx=True,
-	upx_exclude=[],
-	name='joplin-sticky-notes-folder'
+    a.binaries,
+    a.zipfiles,
+    a.datas,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    name="joplin-sticky-notes-folder",
 )
