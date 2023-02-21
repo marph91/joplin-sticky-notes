@@ -370,9 +370,17 @@ if __name__ == "__main__":
     nm = NoteManager()
 
     is_test = bool(os.getenv("TEST"))
-    if not is_test:
+    if is_test:
+        stop_test_timer = QTimer()
+        stop_test_timer.timeout.connect(lambda: nm.check_joplin_status(connect_timer))
+        stop_test_timer.singleShot(10000, app.quit)
+    else:
         joplin_api = setup_joplin(nm.settings)
         note_hierarchy = create_hierarchy(joplin_api)
+
+        connect_timer = QTimer()
+        connect_timer.timeout.connect(lambda: nm.check_joplin_status(connect_timer))
+        connect_timer.start(1000)
 
     # tray menu
     Tray(app)
@@ -381,10 +389,5 @@ if __name__ == "__main__":
     save_timer = QTimer()
     save_timer.timeout.connect(nm.save_notes)
     save_timer.start(5000)
-
-    # TODO: check joplin status
-    connect_timer = QTimer()
-    connect_timer.timeout.connect(lambda: nm.check_joplin_status(connect_timer))
-    connect_timer.start(1000)
 
     sys.exit(app.exec())
