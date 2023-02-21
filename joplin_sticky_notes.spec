@@ -9,7 +9,7 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[
-        ("../img/*", "img"),
+        ("img/*", "img"),
     ],
     hiddenimports=[],
     hookspath=[],
