@@ -46,13 +46,13 @@ exe = EXE(
 )
 
 # for debugging
-coll = COLLECT(
-    exe,
-    a.binaries,
-    a.zipfiles,
-    a.datas,
-    strip=False,
-    upx=True,
-    upx_exclude=[],
-    name="joplin-sticky-notes-folder",
-)
+# coll = COLLECT(
+#     exe,
+#     a.binaries,
+#     a.zipfiles,
+#     a.datas,
+#     strip=False,
+#     upx=True,
+#     upx_exclude=[],
+#     name="joplin-sticky-notes-folder",
+# )
