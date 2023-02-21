@@ -1,0 +1,27 @@
+# Example: https://data-dive.com/multi-os-deployment-in-cloud-using-pyinstaller-and-github-actions
+
+name: test
+
+on: [push]
+
+jobs:
+  build:
+    name: Smoke test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["windows-latest", "ubuntu-latest", "macos-latest"]
+    env:
+      # Run the script in test mode.
+      TEST: 1
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run the executable
+        run: python src/joplin_sticky_notes.py
