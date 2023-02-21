@@ -30,6 +30,4 @@ jobs:
           name: joplin-sticky-notes
           path: ./dist/joplin-sticky-notes
       - name: Run the executable
-        uses: coactions/setup-xvfb@v1
-        with:
-          run: ./dist/joplin-sticky-notes
+        run: ./dist/joplin-sticky-notes
