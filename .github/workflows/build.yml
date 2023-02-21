@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Build executable with pyinstaller
-        run: python -m PyInstaller joplin_sticky_notes.spec --noconfirm --window
+        run: python -m PyInstaller joplin_sticky_notes.spec --noconfirm --windowed
       - uses: actions/upload-artifact@v3
         with:
           name: joplin-sticky-notes-${{ matrix.os }}
