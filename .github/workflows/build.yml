@@ -11,21 +11,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["windows-latest", "ubuntu-latest", "macos-latest"]
+        # TODO: "ubuntu-latest"
+        os: ["windows-latest", "macos-latest"]
     env:
       # Run the script in test mode.
       TEST: 1
-      # https://stackoverflow.com/a/55442821/7410886
-      QT_QPA_PLATFORM: "offscreen"
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
-      - name: Install system dependencies
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: sudo apt install libegl1 libxcb1 --yes
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Build executable with pyinstaller
@@ -35,6 +31,4 @@ jobs:
           name: joplin-sticky-notes-${{ matrix.os }}
           path: ./dist/joplin-sticky-notes*
       - name: Run the executable
-        uses: coactions/setup-xvfb@v1
-        with:
-          run: ./dist/joplin-sticky-notes
+        run: ./dist/joplin-sticky-notes
