@@ -34,7 +34,7 @@ class QtTestCase(unittest.TestCase):
 class Settings(QtTestCase):
     def test_note_from_settings(self):
 
-        geometry = QRect(100, 100, 200, 200)
+        geometry = QRect(100, 100, 400, 400)
         note_visible = True
         body_visible = True
         title = "test title"
