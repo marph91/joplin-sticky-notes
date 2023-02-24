@@ -1,5 +1,16 @@
 # joplin-sticky-notes
 
+Stick your Joplin notes to the desktop.
+
+## Motivation
+
+Keeping important notes in mind, even when the Joplin app is in background or closed.
+
+Related topics:
+
+- <https://discourse.joplinapp.org/t/sticky-notes/3997/8>
+- <https://discourse.joplinapp.org/t/sticky-notes-on-desktop/13767>
+
 ## Installation
 
 Recommended: `pip install git+https://github.com/marph91/joplin-sticky-notes.git`
@@ -33,5 +44,5 @@ python -m unittest -v
 
 The first implementation was done in Gtk. However, there were a few obstacles:
 
-- There seems to be no viable cross platform module. "StatusIcon" is deprecated and "AppIndicator" is linux only. See also: https://stackoverflow.com/questions/41917903/gtk-3-statusicon-replacement
+- There seems to be no viable cross platform module. "StatusIcon" is deprecated and "AppIndicator" is linux only. See also: <https://stackoverflow.com/questions/41917903/gtk-3-statusicon-replacement>
 - PySide has better markdown support. For Gtk, a WebKit2 had to be used. There is no usable python port for Windows and Macos.
