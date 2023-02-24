@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(
-    ["src/joplin_sticky_notes.py"],
+    ["joplin_sticky_notes/app.py"],
     pathex=[],
     binaries=[],
     datas=[

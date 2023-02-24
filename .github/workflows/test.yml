@@ -1,32 +1,30 @@
-# Example: https://data-dive.com/multi-os-deployment-in-cloud-using-pyinstaller-and-github-actions
-
 name: test
 
 on: [push]
 
 jobs:
   build:
-    name: Smoke test
+    name: test
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: ["windows-latest", "ubuntu-latest", "macos-latest"]
-    env:
-      # Run the script in test mode.
-      TEST: 1
-      # https://stackoverflow.com/a/55442821/7410886
-      QT_QPA_PLATFORM: "offscreen"
+    # env:
+    #   # Run the script in test mode.
+    #   TEST: 1
+    #   # https://stackoverflow.com/a/55442821/7410886
+    #   QT_QPA_PLATFORM: "offscreen"
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
-      - name: Install system dependencies
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: sudo apt install libegl1 --yes
+      # - name: Install system dependencies
+      #   if: ${{ matrix.os == 'ubuntu-latest' }}
+      #   run: sudo apt install libegl1 --yes
       - name: Install dependencies
         run: pip install -r requirements.txt
-      - name: Run the script
-        run: python src/joplin_sticky_notes.py
+      - name: Run the tests
+        run: python -m unittest

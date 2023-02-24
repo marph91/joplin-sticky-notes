@@ -1,0 +1,24 @@
+# https://packaging.python.org/en/latest/tutorials/packaging-projects/
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "joplin_sticky_notes"
+version = "0.0.1"
+authors = [
+  { name="Martin Dörfelt", email="martin.d@andix.de" },
+]
+description = "TODO"
+readme = "readme.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/marph91/joplin-sticky-notes"
+
+[tool.setuptools]
+packages = ["joplin_sticky_notes"]

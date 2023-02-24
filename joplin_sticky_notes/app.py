@@ -23,8 +23,8 @@ from PySide6.QtCore import Qt, QRect, QSettings, QTimer, QPoint
 from PySide6.QtGui import QIcon, QAction
 import requests
 
-from joplin_api_helper import setup_joplin, create_hierarchy
-from note_selection import NoteSelection
+from .api_helper import setup_joplin, create_hierarchy
+from .note_selection import NoteSelection
 
 
 class NoteManager:
@@ -38,8 +38,8 @@ class NoteManager:
             self.new_note(
                 self.settings.value("geometry"),
                 # QSettings seems to not support bool properly.
-                self.settings.value("note_visible") == "true",
-                self.settings.value("body_visible") == "true",
+                self.settings.value("note_visible") in ("true", "True", True),
+                self.settings.value("body_visible") in ("true", "True", True),
                 self.settings.value("title"),
                 self.settings.value("content"),
                 self.settings.value("id"),
@@ -70,7 +70,7 @@ class NoteManager:
         id_=None,
     ):
 
-        window = NoteWindow(id_)
+        window = NoteWindow(id_, self)
         window.title_bar.info_id.setText(f"ID: {window.joplin_id}")
         window.setGeometry(geometry)
         window.grip.setVisible(note_visible)
@@ -211,7 +211,7 @@ class TitleBar(QWidget):
         # move clone slightly
         geometry = window.geometry()
         geometry.adjust(20, 20, 20, 20)
-        nm.new_note(
+        self.parent.nm.new_note(
             geometry,
             window.isVisible(),
             window.note_body.isVisible(),
@@ -221,7 +221,7 @@ class TitleBar(QWidget):
         )
 
     def on_close_clicked(self):
-        nm.notes.remove(self.parent)
+        self.parent.nm.notes.remove(self.parent)
         self.parent.close()
 
     def on_open_joplin_clicked(self):
@@ -247,8 +247,10 @@ class TitleBar(QWidget):
 
 
 class NoteWindow(QFrame):
-    def __init__(self, joplin_id):
+    def __init__(self, joplin_id, note_manager):
         super().__init__()
+
+        self.nm = note_manager
 
         # small border
         self.setFrameStyle(QFrame.Box | QFrame.Plain)
@@ -316,8 +318,10 @@ class NoteWindow(QFrame):
 
 
 class Tray(QSystemTrayIcon):
-    def __init__(self, parent):
+    def __init__(self, parent, note_manager):
         super().__init__(parent)
+
+        self.parent = parent
 
         # icon
         self.setIcon(QIcon("img/logo_96_blue.png"))
@@ -328,7 +332,7 @@ class Tray(QSystemTrayIcon):
 
         # new note
         self.new_note = QAction("New Note")
-        self.new_note.triggered.connect(nm.new_note)
+        self.new_note.triggered.connect(note_manager.new_note)
         self.tray_menu.addAction(self.new_note)
 
         # visibility (show/hide all)
@@ -343,7 +347,7 @@ class Tray(QSystemTrayIcon):
 
         # quit
         self.quit_ = QAction("Quit")
-        self.quit_.triggered.connect(app.quit)
+        self.quit_.triggered.connect(self.parent.quit)
         self.tray_menu.addAction(self.quit_)
 
         self.setContextMenu(self.tray_menu)
@@ -361,7 +365,7 @@ class Tray(QSystemTrayIcon):
             note.hide()
 
 
-if __name__ == "__main__":
+def main():
     # TODO: how to test light mode?
     # app = QApplication(['-platform', 'windows:lightmode=2'])
     app = QApplication([])
@@ -375,6 +379,7 @@ if __name__ == "__main__":
         stop_test_timer.timeout.connect(lambda: nm.check_joplin_status(connect_timer))
         stop_test_timer.singleShot(10000, app.quit)
     else:
+        global joplin_api
         joplin_api = setup_joplin(nm.settings)
         note_hierarchy = create_hierarchy(joplin_api)
 
@@ -383,7 +388,7 @@ if __name__ == "__main__":
         connect_timer.start(1000)
 
     # tray menu
-    Tray(app)
+    Tray(app, nm)
 
     # timer
     save_timer = QTimer()
@@ -391,3 +396,7 @@ if __name__ == "__main__":
     save_timer.start(5000)
 
     sys.exit(app.exec())
+
+
+if __name__ == "__main__":
+    main()

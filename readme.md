@@ -2,7 +2,12 @@
 
 ## FAQ
 
-Why PySide and not Gtk?
+### Why is there no single executable?
+
+1. It is really cumbersome to get the ci to work and maintain it.
+2. The executable is greater than 30 MB, since the whole python interpreter and QT are contained.
+
+### Why PySide and not Gtk?
 
 The first implementation was done in Gtk. However, there were a few obstacles:
 

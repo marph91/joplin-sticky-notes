@@ -6,7 +6,7 @@ on: [push]
 
 jobs:
   build:
-    name: Build packages
+    name: build
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
