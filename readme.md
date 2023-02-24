@@ -1,5 +1,27 @@
 # joplin-sticky-notes
 
+## Installation
+
+Recommended: `pip install git+https://github.com/marph91/joplin-sticky-notes.git`
+
+There are some executables as output of the [build workflow](https://github.com/marph91/joplin-sticky-notes/actions/workflows/build.yml). They are untested and should be considered as experimental.
+
+## Usage
+
+1. Activate Joplin's webclipper
+2. `python -m joplin_sticky_notes`
+3. Authorize the request in Joplin
+4. Add the first note through the tray icon
+
+## Development
+
+```sh
+git clone https://github.com/marph91/joplin-sticky-notes.git
+cd joplin-sticky-notes
+pip install -e .
+python -m unittest -v
+```
+
 ## FAQ
 
 ### Why is there no single executable?

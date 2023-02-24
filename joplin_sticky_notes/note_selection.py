@@ -1,6 +1,6 @@
 # pylint: disable=no-name-in-module,missing-function-docstring
 from PySide6.QtWidgets import QTreeWidget, QTreeWidgetItem
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QSize
 
 
 class NoteSelection(QTreeWidget):
@@ -14,6 +14,7 @@ class NoteSelection(QTreeWidget):
         self.setWindowModality(Qt.ApplicationModal)
 
         self.setWindowTitle("Choose Note")
+        self.setMinimumSize(QSize(300, 400))
 
         self.hierarchy = hierarchy
 

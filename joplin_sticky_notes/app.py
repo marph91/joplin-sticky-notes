@@ -366,6 +366,9 @@ class Tray(QSystemTrayIcon):
 
 
 def main():
+    global joplin_api
+    global note_hierarchy
+
     # TODO: how to test light mode?
     # app = QApplication(['-platform', 'windows:lightmode=2'])
     app = QApplication([])
@@ -379,7 +382,6 @@ def main():
         stop_test_timer.timeout.connect(lambda: nm.check_joplin_status(connect_timer))
         stop_test_timer.singleShot(10000, app.quit)
     else:
-        global joplin_api
         joplin_api = setup_joplin(nm.settings)
         note_hierarchy = create_hierarchy(joplin_api)
 
