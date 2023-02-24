@@ -34,11 +34,12 @@ class QtTestCase(unittest.TestCase):
 class Settings(QtTestCase):
     def test_note_from_settings(self):
 
+        # TODO: default width is much bigger on windows (534) and mac (324)
         geometry = QRect(100, 100, 400, 400)
         note_visible = True
         body_visible = True
-        title = "test title"
-        content = "test content"
+        title = "title"
+        content = "content"
         id_ = "test id"
 
         self.settings.beginWriteArray("notes", size=1)
