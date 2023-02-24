@@ -10,11 +10,11 @@ jobs:
       fail-fast: false
       matrix:
         os: ["windows-latest", "ubuntu-latest", "macos-latest"]
-    # env:
+    env:
     #   # Run the script in test mode.
     #   TEST: 1
-    #   # https://stackoverflow.com/a/55442821/7410886
-    #   QT_QPA_PLATFORM: "offscreen"
+      # https://stackoverflow.com/a/55442821/7410886
+      QT_QPA_PLATFORM: "offscreen"
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.10
