@@ -51,14 +51,10 @@ class NoteManager:
 
         try:
             joplin_api.ping()
-            connected = True
             timer.stop()
             print("Joplin Status: Connected")
         except requests.exceptions.ConnectionError:
-            connected = False
             print("Connect Joplin")
-
-        return not connected  # Invert to keep the loop running if not connected.
 
     def new_note(
         self,
@@ -387,7 +383,7 @@ def main():
 
         connect_timer = QTimer()
         connect_timer.timeout.connect(lambda: nm.check_joplin_status(connect_timer))
-        connect_timer.start(1000)
+        connect_timer.start(2000)
 
     # tray menu
     Tray(app, nm)

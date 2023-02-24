@@ -84,8 +84,11 @@ def create_hierarchy(api):
     Create a notebook hierarchy (including notes and resources)
     from a flat notebook list.
     """
-    # Don't use "as_tree=True", since it's undocumented and might be removed.
-    notebooks_flat_api = api.get_all_notebooks(fields="id,title,parent_id")
+    try:
+        # Don't use "as_tree=True", since it's undocumented and might be removed.
+        notebooks_flat_api = api.get_all_notebooks(fields="id,title,parent_id")
+    except requests.exceptions.ConnectionError:
+        return []
     notebooks_flat_map = {notebook.id: notebook for notebook in notebooks_flat_api}
     notebook_tree_ids = create_notebook_tree(notebooks_flat_map)
 
