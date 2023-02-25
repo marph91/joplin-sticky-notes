@@ -2,6 +2,10 @@
 
 Stick your Joplin notes to the desktop.
 
+[![build](https://github.com/marph91/joplin-sticky-notes/actions/workflows/build.yml/badge.svg)](https://github.com/marph91/joplin-sticky-notes/actions/workflows/build.yml)
+[![lint](https://github.com/marph91/joplin-sticky-notes/actions/workflows/lint.yml/badge.svg)](https://github.com/marph91/joplin-sticky-notes/actions/workflows/lint.yml)
+[![tests](https://github.com/marph91/joplin-sticky-notes/actions/workflows/tests.yml/badge.svg)](https://github.com/marph91/joplin-sticky-notes/actions/workflows/tests.yml)
+
 ## Motivation
 
 Keeping important notes in mind, even when the Joplin app is in background or closed.
@@ -10,6 +14,7 @@ Related topics:
 
 - <https://discourse.joplinapp.org/t/sticky-notes/3997/8>
 - <https://discourse.joplinapp.org/t/sticky-notes-on-desktop/13767>
+- <https://discourse.joplinapp.org/t/lock-joplin-to-forefront/21527>
 
 ## Installation
 

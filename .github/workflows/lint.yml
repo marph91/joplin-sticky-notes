@@ -1,0 +1,16 @@
+name: lint
+
+on: [push]
+
+jobs:
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install pip dependencies
+        run: pip install black==22.6.0 flake8==5.0.4 mypy==0.971
+      - name: Run linting
+        run: |
+          black --check .
+          flake8 .
+          mypy .
