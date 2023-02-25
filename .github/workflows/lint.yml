@@ -10,7 +10,7 @@ jobs:
       - name: Install pip dependencies
         run: |
           pip install -r requirements.txt
+          pip install types-requests
           pip install black==22.6.0 flake8==5.0.4 mypy==0.971
-          mypy --install-types
       - name: Run linting
         run: ./lint.sh
