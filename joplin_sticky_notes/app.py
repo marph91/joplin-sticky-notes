@@ -318,6 +318,7 @@ class Tray(QSystemTrayIcon):
         super().__init__(parent)
 
         self.parent = parent
+        self.nm = note_manager
 
         # icon
         self.setIcon(QIcon("img/logo_96_blue.png"))
@@ -351,13 +352,13 @@ class Tray(QSystemTrayIcon):
     def show_all_notes(self):
         # https://stackoverflow.com/a/26316185/7410886
 
-        for note in nm.notes:
+        for note in self.nm.notes:
             note.show()
             note.activateWindow()
             note.raise_()
 
     def hide_all_notes(self):
-        for note in nm.notes:
+        for note in self.nm.notes:
             note.hide()
 
 

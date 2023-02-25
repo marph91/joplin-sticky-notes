@@ -1,12 +1,10 @@
-import asyncio
 import tempfile
 import unittest
 
-from PySide6.QtCore import Qt, QRect, QSettings
+from PySide6.QtCore import QRect, QSettings
 from PySide6.QtWidgets import QApplication
-from PySide6.QtTest import QTest
 
-from joplin_sticky_notes.app import Tray, NoteManager
+from joplin_sticky_notes.app import NoteManager
 
 
 class QtTestCase(unittest.TestCase):
