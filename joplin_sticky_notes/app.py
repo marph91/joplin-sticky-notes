@@ -376,7 +376,6 @@ def main():
     is_test = bool(os.getenv("TEST"))
     if is_test:
         stop_test_timer = QTimer()
-        stop_test_timer.timeout.connect(lambda: nm.check_joplin_status(connect_timer))
         stop_test_timer.singleShot(10000, app.quit)
     else:
         joplin_api = setup_joplin(nm.settings)
