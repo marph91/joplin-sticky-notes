@@ -1,5 +1,6 @@
 # pylint: disable=no-name-in-module,missing-function-docstring
 import os
+import subprocess
 import sys
 import webbrowser
 
@@ -246,6 +247,22 @@ class NoteWindow(QFrame):
     def __init__(self, joplin_id, note_manager):
         super().__init__()
 
+        # don't show in taskbar
+        try:
+            # Workaround to get multiple windows without task bar on X11.
+            # See: https://stackoverflow.com/a/75584018/7410886
+            subprocess.check_call([
+                "xprop",
+                "-f", "_NET_WM_STATE", "32a",
+                "-id", str(self.winId()),
+                "-set", "_NET_WM_STATE", "_NET_WM_STATE_SKIP_TASKBAR",
+            ])
+        except FileNotFoundError:
+            pass  # Probably on windows/mac.
+
+        # no titlebar
+        self.setWindowFlags(Qt.FramelessWindowHint)
+
         self.nm = note_manager
 
         # small border
@@ -272,12 +289,6 @@ class NoteWindow(QFrame):
         self.grip.resize(self.grip_size, self.grip_size)
 
         self.setLayout(self.layout)
-
-        # https://doc.qt.io/qt-6/qt.html#WindowType-enum
-        # https://stackoverflow.com/a/4058002/7410886
-        # no titlebar
-        # don't show in taskbar
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.BypassWindowManagerHint)
 
         # for moving
         self.click_pos = None
