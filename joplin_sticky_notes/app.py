@@ -261,7 +261,8 @@ class NoteWindow(QFrame):
             pass  # Probably on windows/mac.
 
         # no titlebar
-        self.setWindowFlags(Qt.FramelessWindowHint)
+        # no taskbar (in windows)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.SubWindow)
 
         self.nm = note_manager
 

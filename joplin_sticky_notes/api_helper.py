@@ -40,6 +40,7 @@ def setup_joplin(settings):
     if (api_token := settings.value("api_token", None)) is None:
         api_token = request_api_token()
     if api_token is None:
+        print("Couldn't obtain API token. Please start Joplin and activate the webclipper.")
         sys.exit(1)
 
     settings.setValue("api_token", api_token)
