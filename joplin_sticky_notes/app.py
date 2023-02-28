@@ -313,13 +313,15 @@ class NoteWindow(QFrame):
         self.grip.move(
             rect.right() - self.grip.width(), rect.bottom() - self.grip.height()
         )
+        # Reset click position to avoid unwanted moving after resizing on windows.
+        self.click_pos = None
 
     def mousePressEvent(self, event):  # pylint: disable=invalid-name
         if event.button() == Qt.LeftButton:
             self.click_pos = event.scenePosition().toPoint()
 
     def mouseMoveEvent(self, event):  # pylint: disable=invalid-name
-        if hasattr(self, "click_pos") and self.click_pos is not None:
+        if self.click_pos is not None:
             self.window().move(event.globalPosition().toPoint() - self.click_pos)
 
 
