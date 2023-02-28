@@ -318,14 +318,6 @@ class NoteWindow(QFrame):
         if event.button() == Qt.LeftButton:
             self.click_pos = event.scenePosition().toPoint()
 
-            # Somehow the selected window doesn't get on top always.
-            # TODO: remove this hack
-            window = self.window()
-            window.activateWindow()
-            window.raise_()
-            window.move(self.window().pos() + QPoint(1, 1))
-            window.move(self.window().pos() - QPoint(1, 1))
-
     def mouseMoveEvent(self, event):  # pylint: disable=invalid-name
         if hasattr(self, "click_pos") and self.click_pos is not None:
             self.window().move(event.globalPosition().toPoint() - self.click_pos)
