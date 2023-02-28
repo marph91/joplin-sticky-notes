@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
     QPushButton,
     QToolButton,
     QLabel,
+    QStyle,
 )
 from PySide6.QtCore import Qt, QRect, QSettings, QTimer, QPoint
 from PySide6.QtGui import QIcon, QAction
@@ -155,8 +156,9 @@ class TitleBar(QWidget):
         # configure button
         self.configure_button = QToolButton()
         self.configure_button.setDefaultAction(self.choose_note)
-        icon1 = QIcon(QIcon.fromTheme("preferences-system"))
-        self.configure_button.setIcon(icon1)
+        configure_pixmap = QStyle.StandardPixmap.SP_FileDialogDetailedView
+        configure_icon = self.style().standardIcon(configure_pixmap)
+        self.configure_button.setIcon(configure_icon)
         self.configure_button.setPopupMode(QToolButton.MenuButtonPopup)
         self.configure_button.setMenu(self.configure_menu)
         self.layout.addWidget(self.configure_button)
@@ -165,15 +167,17 @@ class TitleBar(QWidget):
         self.clone_button = QPushButton()
         size_policy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.clone_button.setSizePolicy(size_policy)
-        icon2 = QIcon(QIcon.fromTheme("edit-copy"))
-        self.clone_button.setIcon(icon2)
+        clone_pixmap = QStyle.StandardPixmap.SP_TitleBarNormalButton
+        clone_icon = self.style().standardIcon(clone_pixmap)
+        self.clone_button.setIcon(clone_icon)
         self.layout.addWidget(self.clone_button)
 
         # delete button
         self.delete_button = QPushButton()
         self.delete_button.setSizePolicy(size_policy)
-        icon3 = QIcon(QIcon.fromTheme("edit-clear"))
-        self.delete_button.setIcon(icon3)
+        delete_pixmap = QStyle.StandardPixmap.SP_TitleBarCloseButton
+        delete_icon = self.style().standardIcon(delete_pixmap)
+        self.delete_button.setIcon(delete_icon)
         self.delete_button.setFlat(False)
         self.layout.addWidget(self.delete_button)
 
@@ -251,12 +255,14 @@ class NoteWindow(QFrame):
         try:
             # Workaround to get multiple windows without task bar on X11.
             # See: https://stackoverflow.com/a/75584018/7410886
+            # fmt: off
             subprocess.check_call([
                 "xprop",
                 "-f", "_NET_WM_STATE", "32a",
                 "-id", str(self.winId()),
                 "-set", "_NET_WM_STATE", "_NET_WM_STATE_SKIP_TASKBAR",
             ])
+            # fmt: on
         except FileNotFoundError:
             pass  # Probably on windows/mac.
 
