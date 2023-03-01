@@ -2,11 +2,9 @@ from __future__ import annotations
 
 from collections import defaultdict
 from dataclasses import dataclass
-import sys
 import time
 from typing import List
 
-from joppy.api import Api
 import joppy.data_types as dt
 import requests
 
@@ -24,7 +22,7 @@ def request_api_token():
     except requests.exceptions.ConnectionError:
         return None
 
-    for _ in range(30):
+    for _ in range(60):
         response = requests.get(
             f"http://localhost:41184/auth/check?auth_token={auth_token}", timeout=5
         )
@@ -34,20 +32,6 @@ def request_api_token():
                 return data["token"]
         time.sleep(1)
     return None
-
-
-def setup_joplin(settings):
-    if (api_token := settings.value("api_token", None)) is None:
-        api_token = request_api_token()
-    if api_token is None:
-        print(
-            "Couldn't obtain API token. "
-            "Please start Joplin and activate the webclipper."
-        )
-        sys.exit(1)
-
-    settings.setValue("api_token", api_token)
-    return Api(token=api_token)
 
 
 @dataclass
