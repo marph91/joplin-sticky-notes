@@ -40,7 +40,6 @@ class NoteManager:
             self.new_note(
                 self.settings.value("geometry"),
                 # QSettings seems to not support bool properly.
-                self.settings.value("note_visible") in ("true", "True", True),
                 self.settings.value("body_visible") in ("true", "True", True),
                 self.settings.value("title"),
                 self.settings.value("content"),
@@ -61,7 +60,6 @@ class NoteManager:
     def new_note(
         self,
         geometry=QRect(40, 40, 400, 300),
-        note_visible=True,
         body_visible=True,
         title="New Note",
         content="",
@@ -71,15 +69,13 @@ class NoteManager:
         window = NoteWindow(id_, self)
         window.title_bar.info_id.setText(f"ID: {window.joplin_id}")
         window.setGeometry(geometry)
-        window.grip.setVisible(note_visible)
         window.note_body.setVisible(body_visible)
         window.grip.setVisible(body_visible)
         window.title_bar.label.setText(title)
         window.note_body.setMarkdown(content)
-        if note_visible:
-            window.show()
-            window.activateWindow()
-            window.raise_()
+        window.show()
+        window.activateWindow()
+        window.raise_()
 
         # Identify by window, since the windows can have the same title or id.
         self.notes.append(window)
@@ -91,7 +87,6 @@ class NoteManager:
         for index, window in enumerate(self.notes):
             self.settings.setArrayIndex(index)
             self.settings.setValue("geometry", window.geometry())
-            self.settings.setValue("note_visible", window.isVisible())
             self.settings.setValue("body_visible", window.note_body.isVisible())
             self.settings.setValue("title", window.title_bar.label.text())
             self.settings.setValue("content", window.note_body.toMarkdown())
@@ -116,15 +111,13 @@ class TitleBar(QWidget):
         # configure menu
         self.configure_menu = QMenu()
 
-        self.visibility_menu = QMenu("Toggle Visibility")
-        # note is always visible when clicked
-        self.hide_note = QAction("Note")
-        self.hide_note.triggered.connect(lambda: self.parent.setVisible(False))
-        self.visibility_menu.addAction(self.hide_note)
-        self.toggle_body = QAction("Body")
+        self.to_background = QAction("To Background")
+        self.to_background.triggered.connect(self.on_to_background_clicked)
+        self.configure_menu.addAction(self.to_background)
+
+        self.toggle_body = QAction("Toggle Body")
         self.toggle_body.triggered.connect(self.on_toggle_body_clicked)
-        self.visibility_menu.addAction(self.toggle_body)
-        self.configure_menu.addMenu(self.visibility_menu)
+        self.configure_menu.addAction(self.toggle_body)
 
         self.choose_note = QAction("Choose Joplin Note")
         self.choose_note.triggered.connect(self.on_choose_note_clicked)
@@ -189,6 +182,10 @@ class TitleBar(QWidget):
 
         self.height_before = 0
 
+    def on_to_background_clicked(self):
+        for _ in range(10):
+            self.parent.lower()
+
     def on_toggle_body_clicked(self):
         target_visibility = not self.parent.note_body.isVisible()
         self.parent.note_body.setVisible(target_visibility)
@@ -214,7 +211,6 @@ class TitleBar(QWidget):
         geometry.adjust(20, 20, 20, 20)
         self.parent.nm.new_note(
             geometry,
-            window.isVisible(),
             window.note_body.isVisible(),
             window.title_bar.label.text(),
             window.note_body.toMarkdown(),
@@ -344,15 +340,18 @@ class Tray(QSystemTrayIcon):
         self.new_note.triggered.connect(note_manager.new_note)
         self.tray_menu.addAction(self.new_note)
 
-        # visibility (show/hide all)
-        self.visibility_menu = QMenu("Visibility")
-        self.show_all = QAction("Show All")
+        # notes
+        self.notes_menu = QMenu("All Notes")
+        self.show_all = QAction("Show")
         self.show_all.triggered.connect(self.show_all_notes)
-        self.visibility_menu.addAction(self.show_all)
-        self.hide_all = QAction("Hide All")
+        self.notes_menu.addAction(self.show_all)
+        self.hide_all = QAction("To Background")
         self.hide_all.triggered.connect(self.hide_all_notes)
-        self.visibility_menu.addAction(self.hide_all)
-        self.tray_menu.addMenu(self.visibility_menu)
+        self.notes_menu.addAction(self.hide_all)
+        self.close_all = QAction("Close")
+        self.close_all.triggered.connect(self.close_all_notes)
+        self.notes_menu.addAction(self.close_all)
+        self.tray_menu.addMenu(self.notes_menu)
 
         # quit
         self.quit_ = QAction("Quit")
@@ -372,6 +371,11 @@ class Tray(QSystemTrayIcon):
     def hide_all_notes(self):
         for note in self.nm.notes:
             note.hide()
+
+    def close_all_notes(self):
+        for note in self.nm.notes:
+            note.close()
+        self.nm.notes.clear()
 
 
 def main():

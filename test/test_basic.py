@@ -33,7 +33,6 @@ class Settings(QtTestCase):
     def test_note_from_settings(self):
 
         geometry = QRect(100, 100, 200, 200)
-        note_visible = True
         body_visible = True
         title = "title"
         content = "content"
@@ -43,7 +42,6 @@ class Settings(QtTestCase):
         for index in range(1):
             self.settings.setArrayIndex(index)
             self.settings.setValue("geometry", geometry)
-            self.settings.setValue("note_visible", note_visible)
             self.settings.setValue("body_visible", body_visible)
             self.settings.setValue("title", title)
             self.settings.setValue("content", content)
@@ -56,7 +54,6 @@ class Settings(QtTestCase):
         self.assertEqual(len(self.app.allWindows()), 1)
         self.assertEqual(len(nm.notes), 1)
         self.assertEqual(nm.notes[0].geometry(), geometry)
-        self.assertEqual(nm.notes[0].isVisible(), note_visible)
         self.assertEqual(nm.notes[0].note_body.isVisible(), body_visible)
         self.assertEqual(nm.notes[0].title_bar.label.text(), title)
         self.assertEqual(nm.notes[0].note_body.toMarkdown().strip(), content)
