@@ -328,9 +328,9 @@ class Tray(QSystemTrayIcon):
         self.tray_menu = QMenu()
 
         # joplin status
-        self.joplin_status = QAction("Joplin Status: Not Connected")
-        self.joplin_status.setEnabled(False)
-        self.tray_menu.addAction(self.joplin_status)
+        # self.joplin_status = QAction("Joplin Status: Not Connected")
+        # self.joplin_status.setEnabled(False)
+        # self.tray_menu.addAction(self.joplin_status)
 
         # new note
         self.new_note = QAction("New Note")
@@ -357,8 +357,6 @@ class Tray(QSystemTrayIcon):
 
         self.setContextMenu(self.tray_menu)
 
-        self.status_checker = JoplinStatusChecker(self)
-
     def show_all_notes(self):
         # https://stackoverflow.com/a/26316185/7410886
 
@@ -377,34 +375,6 @@ class Tray(QSystemTrayIcon):
         self.nm.notes.clear()
 
 
-class JoplinStatusChecker(QTimer):
-    """
-    Checks the Joplin API status in repeated intervals.
-    Stops when connected once.
-    """
-
-    def __init__(self, tray):
-        super().__init__()
-
-        self.tray_status = tray.joplin_status
-        self.last_connected_state = "Unknown"
-
-        # connect_timer = QTimer()
-        self.timeout.connect(self.check_joplin_status)
-        self.start(2000)
-
-    def check_joplin_status(self):
-        try:
-            joplin_api.ping()
-            connected_state = "Connected"
-            self.stop()
-        except requests.exceptions.ConnectionError:
-            connected_state = "Not Connected"
-
-        if self.last_connected_state != connected_state:
-            self.tray_status.setText(f"Joplin Status: {connected_state}")
-
-
 def main():
     global joplin_api
     global note_hierarchy
@@ -421,6 +391,7 @@ def main():
         stop_test_timer = QTimer()
         stop_test_timer.singleShot(10000, app.quit)
     else:
+        # Try to get the token either from savefile or through Joplin.
         if (api_token := nm.settings.value("api_token", None)) is None:
             QMessageBox.Information(
                 None,
@@ -437,10 +408,22 @@ def main():
                 "Please start Joplin and activate the webclipper.",
             )
             sys.exit(1)
-
         nm.settings.setValue("api_token", api_token)
         joplin_api = Api(token=api_token)
-        note_hierarchy = create_hierarchy(joplin_api)
+
+        # Check if the connection is working.
+        try:
+            joplin_api.ping()
+            note_hierarchy = create_hierarchy(joplin_api)
+        except requests.ConnectionError:
+            note_hierarchy = []
+            QMessageBox.warning(
+                None,
+                "Connect to Joplin",
+                "Couldn't connect to Joplin. Check if it's running and "
+                "the webclipper is activated.\n"
+                "Starting anyway.",
+            )
 
     # tray menu
     Tray(app, nm)
