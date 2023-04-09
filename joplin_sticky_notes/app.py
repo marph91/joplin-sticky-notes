@@ -101,9 +101,9 @@ class TitleBar(QWidget):
         # configure menu
         self.configure_menu = QMenu()
 
-        self.to_background = QAction("To Background")
-        self.to_background.triggered.connect(self.on_to_background_clicked)
-        self.configure_menu.addAction(self.to_background)
+        self.hide = QAction("Hide")
+        self.hide.triggered.connect(self.parent.hide)
+        self.configure_menu.addAction(self.hide)
 
         self.toggle_body = QAction("Toggle Body")
         self.toggle_body.triggered.connect(self.on_toggle_body_clicked)
@@ -171,10 +171,6 @@ class TitleBar(QWidget):
         self.delete_button.clicked.connect(self.on_close_clicked)
 
         self.height_before = 0
-
-    def on_to_background_clicked(self):
-        for _ in range(10):
-            self.parent.lower()
 
     def on_toggle_body_clicked(self):
         target_visibility = not self.parent.note_body.isVisible()
@@ -343,7 +339,7 @@ class Tray(QSystemTrayIcon):
         self.show_all = QAction("Show")
         self.show_all.triggered.connect(self.show_all_notes)
         self.notes_menu.addAction(self.show_all)
-        self.hide_all = QAction("To Background")
+        self.hide_all = QAction("Hide")
         self.hide_all.triggered.connect(self.hide_all_notes)
         self.notes_menu.addAction(self.hide_all)
         self.close_all = QAction("Close")
