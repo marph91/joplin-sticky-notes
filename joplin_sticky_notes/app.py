@@ -239,21 +239,6 @@ class NoteWindow(QFrame):
     def __init__(self, joplin_id, note_manager):
         super().__init__()
 
-        # don't show in taskbar
-        try:
-            # Workaround to get multiple windows without task bar on X11.
-            # See: https://stackoverflow.com/a/75584018/7410886
-            # fmt: off
-            subprocess.check_call([
-                "xprop",
-                "-f", "_NET_WM_STATE", "32a",
-                "-id", str(self.winId()),
-                "-set", "_NET_WM_STATE", "_NET_WM_STATE_SKIP_TASKBAR",
-            ])
-            # fmt: on
-        except FileNotFoundError:
-            pass  # Probably on windows/mac.
-
         # no titlebar
         # no taskbar (in windows)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.SubWindow)
@@ -290,6 +275,24 @@ class NoteWindow(QFrame):
 
         # some joplin specific infos
         self.joplin_id = joplin_id
+
+    def show(self):
+        # don't show in taskbar
+        try:
+            # Workaround to get multiple windows without task bar on X11.
+            # See: https://stackoverflow.com/a/75584018/7410886
+            # fmt: off
+            subprocess.check_call([
+                "xprop",
+                "-f", "_NET_WM_STATE", "32a",
+                "-id", str(self.winId()),
+                "-set", "_NET_WM_STATE", "_NET_WM_STATE_SKIP_TASKBAR",
+            ])
+            # fmt: on
+        except FileNotFoundError:
+            pass  # Probably on windows/mac.
+
+        super().show()
 
     # def changeEvent(self, event):
     #     # https://stackoverflow.com/a/74052370/7410886
