@@ -153,6 +153,7 @@ class TitleBar(QWidget):
         clone_pixmap = QStyle.StandardPixmap.SP_TitleBarNormalButton
         clone_icon = self.style().standardIcon(clone_pixmap)
         self.clone_button.setIcon(clone_icon)
+        self.clone_button.setToolTip("Clone Note")
         self.layout.addWidget(self.clone_button)
 
         # delete button
@@ -161,7 +162,7 @@ class TitleBar(QWidget):
         delete_pixmap = QStyle.StandardPixmap.SP_TitleBarCloseButton
         delete_icon = self.style().standardIcon(delete_pixmap)
         self.delete_button.setIcon(delete_icon)
-        self.delete_button.setFlat(False)
+        self.delete_button.setToolTip("Delete Note")
         self.layout.addWidget(self.delete_button)
 
         self.setLayout(self.layout)
