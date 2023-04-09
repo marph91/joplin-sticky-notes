@@ -4,7 +4,7 @@ Stick your Joplin notes to the desktop.
 
 [![build](https://github.com/marph91/joplin-sticky-notes/actions/workflows/build.yml/badge.svg)](https://github.com/marph91/joplin-sticky-notes/actions/workflows/build.yml)
 [![lint](https://github.com/marph91/joplin-sticky-notes/actions/workflows/lint.yml/badge.svg)](https://github.com/marph91/joplin-sticky-notes/actions/workflows/lint.yml)
-[![tests](https://github.com/marph91/joplin-sticky-notes/actions/workflows/tests.yml/badge.svg)](https://github.com/marph91/joplin-sticky-notes/actions/workflows/tests.yml)
+[![test](https://github.com/marph91/joplin-sticky-notes/actions/workflows/test.yml/badge.svg)](https://github.com/marph91/joplin-sticky-notes/actions/workflows/test.yml)
 
 ## Motivation
 
@@ -20,7 +20,7 @@ Related topics:
 
 Recommended: `pip install git+https://github.com/marph91/joplin-sticky-notes.git`
 
-There are some executables as output of the [build workflow](https://github.com/marph91/joplin-sticky-notes/actions/workflows/build.yml). They are untested and should be considered as experimental.
+There are some executables as output of the [build workflow](https://github.com/marph91/joplin-sticky-notes/actions/workflows/build.yml). They are barely tested and should be considered as experimental.
 
 ## Usage
 
