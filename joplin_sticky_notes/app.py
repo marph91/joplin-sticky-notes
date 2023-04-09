@@ -73,8 +73,6 @@ class NoteManager:
         self.notes.append(window)
 
     def save_notes(self):
-        print("save", len(self.notes))
-
         self.settings.beginWriteArray("notes", size=len(self.notes))
         for index, window in enumerate(self.notes):
             self.settings.setArrayIndex(index)
