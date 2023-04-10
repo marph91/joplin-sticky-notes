@@ -9,7 +9,7 @@ from joppy.api import Api
 from markdown import Markdown
 from PySide6.QtWidgets import (
     QApplication,
-    QTextEdit,
+    QTextBrowser,
     QWidget,
     QSystemTrayIcon,
     QMenu,
@@ -276,7 +276,8 @@ class NoteWindow(QFrame):
         self.layout.addWidget(self.title_bar)
 
         # note body
-        self.note_body = QTextEdit()
+        self.note_body = QTextBrowser()
+        self.note_body.setOpenExternalLinks(True)  # open links in external browser
         size_policy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.note_body.setSizePolicy(size_policy)
         self.note_body.setFrameShadow(QFrame.Sunken)
