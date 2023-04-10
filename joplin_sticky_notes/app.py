@@ -1,10 +1,12 @@
 # pylint: disable=no-name-in-module,missing-function-docstring
 import os
+from pathlib import Path
 import subprocess
 import sys
 import webbrowser
 
 from joppy.api import Api
+from markdown import Markdown
 from PySide6.QtWidgets import (
     QApplication,
     QTextEdit,
@@ -49,6 +51,11 @@ class NoteManager:
             )
         self.settings.endArray()
 
+        self.md = Markdown(extensions=["nl2br", "sane_lists", "tables"])
+
+        self.resource_path = Path(self.settings.fileName()).parent / "resources"
+        self.resource_path.mkdir(exist_ok=True)
+
     def new_note(
         self,
         geometry=QRect(40, 40, 400, 300),
@@ -64,7 +71,7 @@ class NoteManager:
         window.note_body.setVisible(body_visible)
         window.grip.setVisible(body_visible)
         window.title_bar.label.setText(title)
-        window.note_body.setMarkdown(content)
+        window.note_body.setHtml(content)
         window.show()
         window.activateWindow()
         window.raise_()
@@ -79,7 +86,7 @@ class NoteManager:
             self.settings.setValue("geometry", window.geometry())
             self.settings.setValue("body_visible", window.note_body.isVisible())
             self.settings.setValue("title", window.title_bar.label.text())
-            self.settings.setValue("content", window.note_body.toMarkdown())
+            self.settings.setValue("content", window.note_body.toHtml())
             self.settings.setValue("id", window.joplin_id)
         self.settings.endArray()
 
@@ -200,7 +207,7 @@ class TitleBar(QWidget):
             geometry,
             window.note_body.isVisible(),
             window.title_bar.label.text(),
-            window.note_body.toMarkdown(),
+            window.note_body.toHtml(),
             window.joplin_id,
         )
 
@@ -217,12 +224,30 @@ class TitleBar(QWidget):
         NoteSelection(note_hierarchy, self)
 
     def set_note(self, note_title, note_id):
+        # get the note
         joplin_note = joplin_api.get_note(note_id, fields="body")
         self.parent.joplin_id = note_id
 
+        # get attached resources
+        body_markdown = joplin_note.body
+        resources = joplin_api.get_all_resources(note_id=note_id, fields="id")
+        for resource in resources:
+            if not Path(resource.id).exists():
+                resource_binary = joplin_api.get_resource_file(resource.id)
+                with open(self.parent.nm.resource_path / resource.id, "wb") as outfile:
+                    outfile.write(resource_binary)
+            # Replace joplin's local link with the path to the just downloaded resource.
+            body_markdown = body_markdown.replace(
+                f":/{resource.id}", str(self.parent.nm.resource_path / resource.id)
+            )
+
+        # convert note to html, since resources are not displayed when using
+        # setMarkdown(). See: https://forum.qt.io/post/461601
+        body_html = self.parent.nm.md.convert(body_markdown)
+
         # update ui
         self.label.setText(note_title)
-        self.parent.note_body.setMarkdown(joplin_note.body)
+        self.parent.note_body.setHtml(body_html)
         self.info_id.setText(f"ID: {note_id}")
 
     def on_update_hierarchy_clicked(self):
