@@ -3,7 +3,6 @@ import os
 from pathlib import Path
 import subprocess
 import sys
-import webbrowser
 
 from joppy.api import Api
 from markdown import Markdown
@@ -25,8 +24,8 @@ from PySide6.QtWidgets import (
     QStyle,
     QMessageBox,
 )
-from PySide6.QtCore import Qt, QRect, QSettings, QTimer
-from PySide6.QtGui import QIcon, QAction
+from PySide6.QtCore import Qt, QRect, QSettings, QTimer, QUrl
+from PySide6.QtGui import QAction, QIcon, QDesktopServices
 import requests
 
 from .api_helper import create_hierarchy, request_api_token
@@ -217,8 +216,9 @@ class TitleBar(QWidget):
 
     def on_open_joplin_clicked(self):
         # https://joplinapp.org/external_links
-        # TODO: more elegant way (requests doesn't work)
-        webbrowser.open(f"joplin://x-callback-url/openNote?id={self.parent.joplin_id}")
+        QDesktopServices.openUrl(
+            QUrl(f"joplin://x-callback-url/openNote?id={self.parent.joplin_id}")
+        )
 
     def on_choose_note_clicked(self):
         NoteSelection(note_hierarchy, self)
@@ -277,7 +277,12 @@ class NoteWindow(QFrame):
 
         # note body
         self.note_body = QTextBrowser()
-        self.note_body.setOpenExternalLinks(True)  # open links in external browser
+        # Open the links manually, because else PDF files are opened inside the
+        # QTextBrowser and it would crash.
+        self.note_body.setOpenLinks(False)
+        self.note_body.anchorClicked.connect(
+            lambda link: QDesktopServices.openUrl(link)
+        )
         size_policy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.note_body.setSizePolicy(size_policy)
         self.note_body.setFrameShadow(QFrame.Sunken)
