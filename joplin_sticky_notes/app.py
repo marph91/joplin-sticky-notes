@@ -54,7 +54,7 @@ class NoteManager:
         self.md = Markdown(extensions=["nl2br", "sane_lists", "tables"])
 
         self.resource_path = Path(self.settings.fileName()).parent / "resources"
-        self.resource_path.mkdir(exist_ok=True)
+        self.resource_path.mkdir(exist_ok=True, parents=True)
 
     def new_note(
         self,
