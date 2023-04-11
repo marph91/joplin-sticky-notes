@@ -34,10 +34,14 @@ from .note_selection import NoteSelection
 
 class NoteManager:
     def __init__(self):
-        self.notes = []
-
         # https://doc.qt.io/qtforpython/PySide6/QtCore/QSettings.html#locations-where-application-settings-are-stored
         self.settings = QSettings("joplin-sticky-notes", "joplin-sticky-notes")
+
+        self.notes = []
+        self.md = Markdown(extensions=["nl2br", "sane_lists", "tables"])
+        self.resource_path = Path(self.settings.fileName()).parent / "resources"
+        self.resource_path.mkdir(exist_ok=True, parents=True)
+
         for index in range(self.settings.beginReadArray("notes")):
             self.settings.setArrayIndex(index)
             self.new_note(
@@ -49,11 +53,6 @@ class NoteManager:
                 self.settings.value("id"),
             )
         self.settings.endArray()
-
-        self.md = Markdown(extensions=["nl2br", "sane_lists", "tables"])
-
-        self.resource_path = Path(self.settings.fileName()).parent / "resources"
-        self.resource_path.mkdir(exist_ok=True, parents=True)
 
     def new_note(
         self,
