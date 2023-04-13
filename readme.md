@@ -6,6 +6,10 @@ Stick your Joplin notes to the desktop.
 [![lint](https://github.com/marph91/joplin-sticky-notes/actions/workflows/lint.yml/badge.svg)](https://github.com/marph91/joplin-sticky-notes/actions/workflows/lint.yml)
 [![test](https://github.com/marph91/joplin-sticky-notes/actions/workflows/test.yml/badge.svg)](https://github.com/marph91/joplin-sticky-notes/actions/workflows/test.yml)
 
+| Linux, dark theme | Windows, light theme |
+| - | - |
+| ![example_linux_dark_theme.png](img/example_linux_dark_theme.png) | ![example_windows_light_theme.png](img/example_windows_light_theme.png) |
+
 ## Motivation
 
 Keeping important notes in mind, even when the Joplin app is in background or closed.
