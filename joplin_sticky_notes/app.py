@@ -421,7 +421,7 @@ def main():
     else:
         # Try to get the token either from savefile or through Joplin.
         if (api_token := nm.settings.value("api_token", None)) is None:
-            QMessageBox.Information(
+            QMessageBox.information(
                 None,
                 "Connect to Joplin",
                 "Please open Joplin, activate the webclipper. "
@@ -429,7 +429,7 @@ def main():
             )
             api_token = request_api_token()
         if api_token is None:
-            QMessageBox.Critical(
+            QMessageBox.critical(
                 None,
                 "Connect to Joplin",
                 "Couldn't obtain API token. "
