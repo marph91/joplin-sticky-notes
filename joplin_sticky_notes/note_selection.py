@@ -31,13 +31,13 @@ class NoteSelection(QTreeWidget):
 
     def fill_tree(self):
         def populate_store_from_hierarchy(hierarchy, root=self):
-            for item in hierarchy:
+            for item in sorted(hierarchy, key=lambda item: item.data.title):
                 new_root = QTreeWidgetItem(root)
                 new_root.setText(0, item.data.title)
                 new_root.setText(1, None)
                 new_root.setExpanded(True)
                 populate_store_from_hierarchy(item.child_items, new_root)
-                for note in item.child_notes:
+                for note in sorted(item.child_notes, key=lambda note: note.title):
                     item = QTreeWidgetItem(new_root)
                     item.setText(0, note.title)
                     item.setText(1, note.id)
