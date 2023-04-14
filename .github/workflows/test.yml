@@ -23,7 +23,7 @@ jobs:
           python-version: "3.10"
       - name: Install system dependencies
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: sudo apt install libegl1 --yes
+        run: sudo apt install libegl1-dev --yes
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Run the tests
