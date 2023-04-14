@@ -11,8 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # TODO: "ubuntu-latest"
-        os: ["windows-latest", "macos-latest"]
+        os: ["macos-latest", "ubuntu-latest", "windows-latest"]
     env:
       # Run the script in test mode.
       TEST: 1
