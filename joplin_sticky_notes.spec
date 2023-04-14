@@ -31,6 +31,7 @@ exe = EXE(
     a.datas,
     [],
     name="joplin-sticky-notes",
+    icon="img/logo_96_blue.ico",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
