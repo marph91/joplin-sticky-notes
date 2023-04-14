@@ -51,4 +51,6 @@ jobs:
           name: joplin-sticky-notes-${{ matrix.os }}
           path: ./dist/joplin-sticky-notes*
       - name: Run the executable
-        run: ./dist/joplin-sticky-notes
+        uses: coactions/setup-xvfb@v1
+        with:
+          run: ./dist/joplin-sticky-notes
