@@ -13,8 +13,9 @@ jobs:
       matrix:
         os: ["macos-latest", "ubuntu-latest", "windows-latest"]
     env:
-      # Run the script in test mode.
+      # Run the executable in test and debug mode.
       TEST: 1
+      QT_DEBUG_PLUGINS: 1 
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.10
@@ -24,8 +25,8 @@ jobs:
       - name: Install system dependencies
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
-          sudo apt update && sudo apt upgrade
-          sudo apt install libegl-dev libxcb1-dev libxcb-xinerama0-dev libxinerama-dev --yes
+          sudo apt update
+          sudo apt install libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-shape0 libxkbcommon-x11-0 --yes
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Build executable with pyinstaller
