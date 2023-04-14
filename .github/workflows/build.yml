@@ -25,7 +25,7 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
           sudo apt update && sudo apt upgrade
-          sudo apt install libegl-dev --yes
+          sudo apt install libegl-dev libxcb1-dev --yes
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Build executable with pyinstaller
