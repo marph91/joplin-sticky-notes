@@ -60,10 +60,11 @@ python -m unittest -v
 
 ## FAQ
 
-### Why is there no single executable?
+### Why is the single executable not recommended?
 
 1. It is really cumbersome to get the ci to work and maintain it.
 2. The executable is greater than 30 MB, since the whole python interpreter and QT are contained.
+3. It may be wrongly flagged as virus from windows.
 
 ### Why PySide and not Gtk?
 
