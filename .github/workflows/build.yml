@@ -29,6 +29,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt install --yes \
+            libegl-dev \
             libfontconfig1-dev \
             libfreetype6-dev \
             libx11-dev \
