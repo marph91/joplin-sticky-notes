@@ -349,7 +349,10 @@ class Tray(QSystemTrayIcon):
         self.nm = note_manager
 
         # icon
-        self.setIcon(QIcon("img/logo_96_blue.png"))
+        # Pyinstaller has different path than module.
+        # https://stackoverflow.com/a/44352931/7410886
+        base_path = getattr(sys, "_MEIPASS", Path(__file__).parent)
+        self.setIcon(QIcon(f"{base_path}/logo_96_blue.png"))
         self.setVisible(True)
 
         # menu

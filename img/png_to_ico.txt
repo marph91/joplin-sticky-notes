@@ -1,1 +1,3 @@
-convert logo_96_blue.png -define icon:auto-resize=64,32,16 logo_96_blue.ico
+- PNG is for the tray icon
+- ICO is only for the windows explorer
+- conversion: convert logo_96_blue.png -define icon:auto-resize=64,32,16 logo_96_blue.ico

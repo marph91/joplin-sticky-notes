@@ -9,7 +9,7 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[
-        ("img/*", "img"),
+        ("joplin_sticky_notes/logo_96_blue.png", "."),
     ],
     hiddenimports=[],
     hookspath=[],
