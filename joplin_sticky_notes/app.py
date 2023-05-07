@@ -25,7 +25,7 @@ from PySide6.QtWidgets import (
     QMessageBox,
 )
 from PySide6.QtCore import Qt, QRect, QSettings, QTimer, QUrl
-from PySide6.QtGui import QAction, QIcon, QDesktopServices
+from PySide6.QtGui import QAction, QCursor, QIcon, QDesktopServices
 import requests
 
 from .api_helper import create_hierarchy, request_api_token
@@ -387,6 +387,11 @@ class Tray(QSystemTrayIcon):
         self.tray_menu.addAction(self.quit_)
 
         self.setContextMenu(self.tray_menu)
+
+        # Show tray menu at left click, too. It looks a bit different to the
+        # context menu, but better than no left click menu at all.
+        # https://stackoverflow.com/a/64438106/7410886
+        self.activated.connect(lambda: self.contextMenu().popup(QCursor.pos()))
 
     def show_all_notes(self):
         # https://stackoverflow.com/a/26316185/7410886
