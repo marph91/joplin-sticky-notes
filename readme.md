@@ -53,8 +53,8 @@ To start the script automatically after boot, you can add it to the autostart of
 
 Examples:
 
-* [Linux/KDE](integration/joplin-sticky-notes.desktop)
-* [Windows 10](integration/joplin-sticky-notes.vbs)
+- [Linux/KDE](integration/joplin-sticky-notes.desktop)
+- [Windows 10](integration/joplin-sticky-notes.vbs)
 
 ## Development
 
