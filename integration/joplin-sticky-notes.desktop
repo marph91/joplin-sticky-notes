@@ -1,6 +1,6 @@
 # cp integration/joplin-sticky-notes.desktop ~/.config/autostart
 [Desktop Entry]
 Comment=Joplin Sticky Notes
-Exec=bash -c "sleep 5 && /path/to/python -m joplin_sticky_notes"
+Exec=bash -c "sleep 10 && /path/to/python -m joplin_sticky_notes"
 Name=joplin-sticky-notes
 Type=Application
