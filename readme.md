@@ -49,7 +49,12 @@ There are some executables as output of the [build workflow](https://github.com/
 3. Authorize the request in Joplin
 4. Add the first note through the tray icon
 
-To start the script automatically after boot, you can add it to the autostart of your OS. Make sure it starts after Joplin. [Example for Linux/KDE](integration/joplin-sticky-notes.desktop).
+To start the script automatically after boot, you can add it to the autostart of your OS. Make sure it starts after Joplin.
+
+Examples:
+
+* [Linux/KDE](integration/joplin-sticky-notes.desktop)
+* [Windows 10](integration/joplin-sticky-notes.vbs)
 
 ## Development
 
