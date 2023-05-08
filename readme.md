@@ -38,9 +38,16 @@ Related topics:
 
 ## Installation
 
-Recommended: `pip install git+https://github.com/marph91/joplin-sticky-notes.git`
+There are two ways for installation:
 
-There are some executables as output of the [build workflow](https://github.com/marph91/joplin-sticky-notes/actions/workflows/build.yml). They are barely tested and should be considered as experimental.
+1. `pip install git+https://github.com/marph91/joplin-sticky-notes.git` (recommended)
+2. Grab a single file executable from the [build workflow](https://github.com/marph91/joplin-sticky-notes/actions/workflows/build.yml).
+
+The single file executable seems to be convenient, but has some disadvantages:
+
+1. It is really cumbersome to get the ci to work and maintain it.
+2. The executable is greater than 30 MB, since the whole python interpreter and QT are contained.
+3. It may be wrongly flagged as virus from windows.
 
 ## Usage
 
@@ -65,17 +72,11 @@ pip install -e .
 python -m unittest -v
 ```
 
-## FAQ
+## Lessons learned
 
-### Why is the single executable not recommended?
-
-1. It is really cumbersome to get the ci to work and maintain it.
-2. The executable is greater than 30 MB, since the whole python interpreter and QT are contained.
-3. It may be wrongly flagged as virus from windows.
-
-### Why PySide and not Gtk?
+### PySide or Gtk?
 
 The first implementation was done in Gtk. However, there were a few obstacles:
 
-- There seems to be no viable cross platform module for the tray. "StatusIcon" is deprecated and "AppIndicator" is linux only. See also: <https://stackoverflow.com/questions/41917903/gtk-3-statusicon-replacement>
-- PySide has better markdown support. For Gtk, a WebKit2 had to be used. There is no viable python port for Windows and Macos.
+1. There seems to be no viable cross platform module for the tray. "StatusIcon" is deprecated and "AppIndicator" is linux only. See also: <https://stackoverflow.com/questions/41917903/gtk-3-statusicon-replacement>
+2. PySide has better markdown support. For Gtk, a WebKit2 had to be used. There is no viable python port for Windows and Macos.
