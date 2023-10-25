@@ -2,7 +2,11 @@
 
 name: build
 
-on: [push]
+on: 
+  push:
+  # build once a month to ensure the artifacts are available
+  schedule:
+    - cron: "0 0 1 * *"
 
 jobs:
   build:
