@@ -10,7 +10,6 @@ import requests
 
 
 def request_api_token():
-
     # TODO: Make more robust.
 
     try:

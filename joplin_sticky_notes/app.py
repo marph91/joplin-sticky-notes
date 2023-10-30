@@ -62,7 +62,6 @@ class NoteManager:
         content="",
         id_=None,
     ):
-
         window = NoteWindow(id_, self)
         window.title_bar.info_id.setText(f"ID: {window.joplin_id}")
         window.setGeometry(geometry)
