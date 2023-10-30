@@ -77,9 +77,18 @@ class NoteManager:
         # Identify by window, since the windows can have the same title or id.
         self.notes.append(window)
 
-    def save_notes(self):
+    def save_update_notes(self):
         self.settings.beginWriteArray("notes", size=len(self.notes))
         for index, window in enumerate(self.notes):
+            # update
+            if window.joplin_id is not None:
+                try:
+                    note = joplin_api.get_note(window.joplin_id, fields="title")
+                    window.title_bar.set_note(note.title, window.joplin_id)
+                except requests.exceptions.ConnectionError:
+                    print("ConnectionError during update. Trying again next time.")
+
+            # save
             self.settings.setArrayIndex(index)
             self.settings.setValue("geometry", window.geometry())
             self.settings.setValue("body_visible", window.note_body.isVisible())
@@ -466,7 +475,7 @@ def main():
 
     # timer
     save_timer = QTimer()
-    save_timer.timeout.connect(nm.save_notes)
+    save_timer.timeout.connect(nm.save_update_notes)
     save_timer.start(5000)
 
     sys.exit(app.exec())
