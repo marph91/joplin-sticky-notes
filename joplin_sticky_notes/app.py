@@ -221,11 +221,17 @@ class TitleBar(QWidget):
         self.parent.nm.notes.remove(self.parent)
         self.parent.close()
 
-    def on_open_joplin_clicked(self):
-        # https://joplinapp.org/external_links
+    def open_note_in_joplin(self):
+        # https://joplinapp.org/help/apps/external_links
         QDesktopServices.openUrl(
             QUrl(f"joplin://x-callback-url/openNote?id={self.parent.joplin_id}")
         )
+
+    def on_open_joplin_clicked(self):
+        self.open_note_in_joplin()
+
+    def mouseDoubleClickEvent(self, _):
+        self.open_note_in_joplin()
 
     def on_choose_note_clicked(self):
         NoteSelection(note_hierarchy, self)
