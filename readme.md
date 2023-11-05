@@ -40,8 +40,10 @@ Related topics:
 
 There are two ways for installation:
 
-1. `pip install git+https://github.com/marph91/joplin-sticky-notes.git` (recommended)
-2. Grab a single file executable from the [build workflow](https://github.com/marph91/joplin-sticky-notes/actions/workflows/build.yml).
+1. Single file executable from the [build workflow](https://github.com/marph91/joplin-sticky-notes/actions/workflows/build.yml).
+   - Recommended if you don't have experience in installing python modules.
+2. `pip install git+https://github.com/marph91/joplin-sticky-notes.git`
+   - Recommended if you have a working python environment and know how to install modules.
 
 The single file executable seems to be convenient, but has some disadvantages:
 
