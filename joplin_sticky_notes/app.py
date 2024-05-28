@@ -45,17 +45,19 @@ class NoteManager:
         for index in range(self.settings.beginReadArray("notes")):
             self.settings.setArrayIndex(index)
             self.new_note(
-                self.settings.value("geometry"),
+                geometry=self.settings.value("geometry"),
                 # QSettings seems to not support bool properly.
-                self.settings.value("body_visible") in ("true", "True", True),
-                self.settings.value("title"),
-                self.settings.value("content"),
-                self.settings.value("id"),
+                body_visible=self.settings.value("body_visible")
+                in ("true", "True", True),
+                title=self.settings.value("title"),
+                content=self.settings.value("content"),
+                id_=self.settings.value("id"),
             )
         self.settings.endArray()
 
     def new_note(
         self,
+        *args,  # needed to suppress bool parameter from QAction
         geometry=QRect(40, 40, 400, 300),
         body_visible=True,
         title="New Note",
@@ -210,11 +212,11 @@ class TitleBar(QWidget):
         geometry = window.geometry()
         geometry.adjust(20, 20, 20, 20)
         self.parent.nm.new_note(
-            geometry,
-            window.note_body.isVisible(),
-            window.title_bar.label.text(),
-            window.note_body.toHtml(),
-            window.joplin_id,
+            geometry=geometry,
+            body_visible=window.note_body.isVisible(),
+            title=window.title_bar.label.text(),
+            content=window.note_body.toHtml(),
+            id_=window.joplin_id,
         )
 
     def on_close_clicked(self):

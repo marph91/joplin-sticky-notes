@@ -8,9 +8,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Install pip dependencies
-        run: |
-          pip install -r requirements.txt
-          pip install types-Markdown types-requests
-          pip install black==22.6.0 flake8==5.0.4 mypy==0.971
+        run: pip install -r requirements-dev.txt
       - name: Run linting
         run: ./lint.sh
