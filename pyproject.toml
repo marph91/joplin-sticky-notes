@@ -27,4 +27,4 @@ classifiers = [
 packages = ["joplin_sticky_notes"]
 
 [tool.setuptools.package-data]
-joplin_sticky_notes = ["joplin_sticky_notes/logo_96_blue.png"]
+joplin_sticky_notes = ["logo_96_blue.png"]
