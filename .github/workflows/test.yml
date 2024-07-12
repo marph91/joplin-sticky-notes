@@ -16,11 +16,11 @@ jobs:
       # https://stackoverflow.com/a/55442821/7410886
       QT_QPA_PLATFORM: "offscreen"
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python 3.10
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.11
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: "3.11"
       - name: Install system dependencies
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: sudo apt install libegl-dev --yes
