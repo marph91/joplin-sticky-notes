@@ -6,7 +6,7 @@ block_cipher = None
 
 # Generate the executable name based on OS.
 import platform
-executable_name = f"jimmy-cli-{platform.system().lower()}"
+executable_name = f"joplin-sticky-notes-{platform.system().lower()}"
 
 
 a = Analysis(
