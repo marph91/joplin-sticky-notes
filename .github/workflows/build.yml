@@ -55,7 +55,16 @@ jobs:
         if: ${{ startsWith(github.ref, 'refs/tags/v') }}
         with:
           files: ./dist/joplin-sticky-notes*
+      - name: Normalize executable name
+        # this is needed, because wildcards aren't expanded in the following action
+        run:   |
+            if [ "$RUNNER_OS" == "Windows" ]; then
+                copy ./dist/joplin-sticky-notes* ./dist/joplin-sticky-notes
+            else
+                cp ./dist/joplin-sticky-notes* ./dist/joplin-sticky-notes
+            fi
+        shell: bash
       - name: Run the executable (smoke test)
         uses: coactions/setup-xvfb@v1
         with:
-          run: ./dist/joplin-sticky-notes*
+          run: ./dist/joplin-sticky-notes
