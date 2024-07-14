@@ -4,6 +4,11 @@
 block_cipher = None
 
 
+# Generate the executable name based on OS.
+import platform
+executable_name = f"jimmy-cli-{platform.system().lower()}"
+
+
 a = Analysis(
     ["joplin_sticky_notes/__main__.py"],
     pathex=[],
@@ -30,7 +35,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name="joplin-sticky-notes",
+    name=executable_name,
     icon="img/logo_96_blue.ico",
     debug=False,
     bootloader_ignore_signals=False,

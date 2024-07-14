@@ -4,9 +4,8 @@ name: build
 
 on: 
   push:
-  # build once a month to ensure the artifacts are available
-  schedule:
-    - cron: "0 0 1 * *"
+  pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
@@ -50,11 +49,13 @@ jobs:
         run: pip install -r requirements.txt
       - name: Build executable with pyinstaller
         run: python -m PyInstaller joplin_sticky_notes.spec --noconfirm
-      - uses: actions/upload-artifact@v3
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        # release only if there is a release tag
+        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
         with:
-          name: joplin-sticky-notes-${{ matrix.os }}
-          path: ./dist/joplin-sticky-notes*
-      - name: Run the executable
+          files: ./dist/joplin-sticky-notes*
+      - name: Run the executable (smoke test)
         uses: coactions/setup-xvfb@v1
         with:
-          run: ./dist/joplin-sticky-notes
+          run: ./dist/joplin-sticky-notes*
