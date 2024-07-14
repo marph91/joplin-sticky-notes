@@ -57,7 +57,13 @@ jobs:
           files: ./dist/joplin-sticky-notes*
       - name: Normalize executable name
         # this is needed, because wildcards aren't expanded in the following action
-        run: cp ./dist/joplin-sticky-notes* ./dist/joplin-sticky-notes
+        # preserve the .exe suffix, because else windows doesn't know what to do
+        run: |
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            cp ./dist/joplin-sticky-notes*.exe ./dist/joplin-sticky-notes.exe
+          else
+            cp ./dist/joplin-sticky-notes* ./dist/joplin-sticky-notes
+          fi
         shell: bash
       - name: Run the executable (smoke test)
         uses: coactions/setup-xvfb@v1
