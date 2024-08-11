@@ -40,7 +40,7 @@ Related topics:
 
 There are two ways for installation:
 
-1. Single file executable from the [releases page](https://github.com/marph91/joplin-sticky-notes/releases/latest).
+1. Single file executable from the releases page: [**Linux**](https://github.com/marph91/joplin-sticky-notes/releases/latest/download/joplin-sticky-notes-linux) | [**Windows**](https://github.com/marph91/joplin-sticky-notes/releases/latest/download/joplin-sticky-notes-windows.exe) | [**MacOS**](https://github.com/marph91/joplin-sticky-notes/releases/latest/download/joplin-sticky-notes-darwin).
    - Recommended if you don't have experience in installing python modules.
 2. `pip install git+https://github.com/marph91/joplin-sticky-notes.git`
    - Recommended if you have a working python environment and know how to install modules.
