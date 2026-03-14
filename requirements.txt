@@ -1,5 +1,5 @@
-joppy==0.2.3
-Markdown==3.6
-pyinstaller==6.9.0
-PySide6==6.7.2
-requests==2.32.3
+joppy==1.0.2
+Markdown==3.10.2
+pyinstaller==6.19.0
+PySide6==6.10.2
+requests==2.32.5

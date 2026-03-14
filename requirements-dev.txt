@@ -1,6 +1,6 @@
 -r requirements.txt
-black==24.4.2
-flake8==7.1.0
-mypy==1.10.1
-types-Markdown==3.6.0.20240316
-types-requests==2.32.0.20240712
+black==26.3.1
+flake8==7.3.0
+mypy==1.19.1
+types-Markdown==3.10.2.20260211
+types-requests==2.32.4.20260107
