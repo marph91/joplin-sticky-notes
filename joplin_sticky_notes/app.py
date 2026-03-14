@@ -4,7 +4,7 @@ from pathlib import Path
 import subprocess
 import sys
 
-from joppy.api import Api
+from joppy.client_api import ClientApi
 from markdown import Markdown
 from PySide6.QtWidgets import (
     QApplication,
@@ -461,7 +461,7 @@ def main():
             )
             sys.exit(1)
         nm.settings.setValue("api_token", api_token)
-        joplin_api = Api(token=api_token)
+        joplin_api = ClientApi(token=api_token)
 
         # Check if the connection is working.
         try:

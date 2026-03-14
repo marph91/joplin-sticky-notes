@@ -23,10 +23,10 @@ jobs:
       QT_DEBUG_PLUGINS: 1 
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python 3.11
+      - name: Set up Python 3.14
         uses: actions/setup-python@v4
         with:
-          python-version: "3.11"
+          python-version: "3.14"
       # https://github.com/Nuitka/Nuitka/issues/2138#issuecomment-1498994385
       # https://doc.qt.io/qt-6/linux-requirements.html
       - name: Install system dependencies
